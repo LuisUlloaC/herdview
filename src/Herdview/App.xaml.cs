@@ -45,6 +45,8 @@ namespace Herdview
         /// <summary>Las sesiones de los contenedores, de la última consulta a Docker (en segundo plano).</summary>
         private List<Sesion> _sesionesDocker = new List<Sesion>();
         private bool _consultandoDocker;
+        /// <summary>Sesiones que se están cerrando: se esconden ya, sin esperar a que su fichero desaparezca.</summary>
+        private readonly HashSet<string> _cerradas = new HashSet<string>();
         private DateTime _ultimaDocker = DateTime.MinValue;
 
         private void AlArrancar(object sender, StartupEventArgs e)
@@ -149,7 +151,8 @@ namespace Herdview
             ConsultarDocker(ahora);
             anotadas.AddRange(Procesos.SinDatos(anotadas, _procesos,
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)));
-            var sesiones = Panorama.Ordenar(anotadas, Vista);
+            _cerradas.RemoveWhere(id => anotadas.All(s => s.Id != id));
+            var sesiones = Panorama.Ordenar(anotadas.Where(s => !_cerradas.Contains(s.Id)), Vista);
             if (_panel != null && _panel.IsKeyboardFocusWithin)
             {
                 // Escribiendo en el panel: mover filas regeneraría la caja y se perdería lo escrito. Se reordena al salir.
@@ -190,7 +193,7 @@ namespace Herdview
                 SesionVM vm;
                 if (j < 0)
                 {
-                    vm = new SesionVM(s, Enfocar, Enviar);
+                    vm = new SesionVM(s, Enfocar, Enviar, Cerrar);
                     coleccion.Insert(i, vm);
                 }
                 else
@@ -431,6 +434,56 @@ namespace Herdview
             }
             Recargar();
             _panel.Abrir(_todas.FirstOrDefault(v => v.Id == _sesionDelAviso));
+        }
+
+        /// <summary>Cierra la sesión tras confirmarlo: en Windows con Ctrl+C a su consola (y a la fuerza si no sale), en
+        /// un contenedor con kill -TERM (y -KILL). Se hace en segundo plano y la sesión desaparece de la lista al acabar.</summary>
+        private void Cerrar(SesionVM vm)
+        {
+            var s = vm.Sesion;
+            string donde = s.Contenedor.Length > 0 ? "en el contenedor " + s.Contenedor : vm.Origen;
+            string aviso = s.Estado == EstadoSesion.Trabajando ? "\n\nEstá trabajando: se cortará lo que esté haciendo." : "";
+            if (MessageBox.Show("¿Cerrar la sesión «" + vm.Proyecto + "» (" + donde + ")?" + aviso, "Herdview",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) != MessageBoxResult.Yes)
+            {
+                return;
+            }
+            int pid = s.Contenedor.Length > 0 ? 0 : Procesos.PidClaude(s, _procesos.Tabla());
+            if (s.Contenedor.Length == 0 && pid == 0)
+            {
+                MessageBox.Show("No encuentro el proceso de esa sesión: puede que ya se haya cerrado.", "Herdview");
+                return;
+            }
+            vm.PonerNota("Cerrando…");
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                if (s.Contenedor.Length > 0)
+                {
+                    return EnDocker.Cerrar(_docker, s) ? "cerrada" : "no se pudo cerrar";
+                }
+                return Cerrador.Cerrar(pid);
+            }).ContinueWith(t =>
+            {
+                string resultado = t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion ? t.Result : "no se pudo cerrar";
+                if (resultado.StartsWith("no", StringComparison.Ordinal))
+                {
+                    vm.PonerNota("No se pudo cerrar");
+                    return;
+                }
+                _cerradas.Add(s.Id);
+                if (s.Contenedor.Length == 0)
+                {
+                    try
+                    {
+                        File.Delete(Path.Combine(AlmacenSesiones.CarpetaPorDefecto, s.Id + ".json"));
+                    }
+                    catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+                    {
+                    }
+                }
+                _ultimaDocker = DateTime.MinValue;
+                Recargar();
+            }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         private bool Enviar(SesionVM vm, string texto)

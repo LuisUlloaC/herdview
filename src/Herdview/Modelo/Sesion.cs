@@ -56,6 +56,8 @@ namespace Herdview.Modelo
         [DataMember(Name = "desde")] public double Desde { get; set; }
         /// <summary>Segundos Unix de la última actualización.</summary>
         [DataMember(Name = "ts")] public double Ts { get; set; }
+        /// <summary>PID del Claude de la sesión dentro de su contenedor (en Windows sale de la cadena de procesos).</summary>
+        [DataMember(Name = "pid_claude")] public int PidClaude { get; set; }
         [DataMember(Name = "contenedor")] public string Contenedor { get; set; } = "";
         /// <summary>Id de Docker del contenedor (lo pone Herdview al leerla; no viene del hook).</summary>
         public string ContenedorId { get; set; } = "";

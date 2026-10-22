@@ -125,7 +125,7 @@ class Contenedor(unittest.TestCase):
         self.assertFalse(os.path.exists(herdview.ruta_de("muerta")))
 
     def test_enviar_suma_al_buzon(self):
-        herdview.enviar("s1", " hola ")
+        herdview.enviar("s1", "﻿ hola ")
         herdview.enviar("s1", "sigue")
         with open(herdview.buzon_de("s1", ".txt"), encoding="utf-8") as fh:
             self.assertEqual(fh.read(), "hola\n\nsigue")

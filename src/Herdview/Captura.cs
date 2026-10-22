@@ -30,7 +30,7 @@ namespace Herdview
             var todas = new ObservableCollection<SesionVM>();
             foreach (var s in ejemplos)
             {
-                var vm = new SesionVM(s, _ => { }, (_, __) => true);
+                var vm = new SesionVM(s, _ => { }, (_, __) => true, _ => { });
                 vm.Actualizar(s, false, ahora);
                 todas.Add(vm);
             }

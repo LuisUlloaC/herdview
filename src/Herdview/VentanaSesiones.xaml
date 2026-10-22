@@ -50,7 +50,7 @@
         </Border>
 
         <!-- Rótulos de las columnas. -->
-        <Grid DockPanel.Dock="Top" Margin="24,12,24,6">
+        <Grid DockPanel.Dock="Top" Margin="24,12,60,6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="30" />
                 <ColumnDefinition Width="210" />
@@ -78,7 +78,13 @@
                 <ItemsControl x:Name="Lista" Margin="16,0,16,16">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Button Style="{StaticResource BotonPlano}" Command="{Binding Enfocar}" Margin="0,1"
+                            <DockPanel Margin="0,1">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource BotonPlano}" Command="{Binding Cerrar}"
+                                    Width="36" ToolTip="Cerrar esta sesión de Claude">
+                                <TextBlock Text="✕" Foreground="{StaticResource BrApagada}" FontSize="12"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                            <Button Style="{StaticResource BotonPlano}" Command="{Binding Enfocar}"
                                     HorizontalContentAlignment="Stretch">
                                 <Grid Margin="8,11,8,11">
                                     <Grid.ColumnDefinitions>
@@ -120,6 +126,7 @@
                                     <TextBlock Grid.Column="7" Text="{Binding Salida}" Style="{StaticResource Cifra}" />
                                 </Grid>
                             </Button>
+                            </DockPanel>
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding TienePedido}" Value="False">
                                     <Setter TargetName="Pedido" Property="Visibility" Value="Collapsed" />

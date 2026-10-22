@@ -53,6 +53,20 @@ namespace Herdview.Tests
         }
 
         [Fact]
+        public void Cerrar_manda_term_y_luego_kill_al_pid_de_la_sesion()
+        {
+            var d = new DockerFalso();
+            Assert.False(EnDocker.Cerrar(d, new Sesion { Id = "s1", ContenedorId = "abc" }));
+            Assert.Empty(d.Llamadas);
+            Assert.True(EnDocker.Cerrar(d, new Sesion { Id = "s1", ContenedorId = "abc", PidClaude = 63 }));
+            var llamada = Assert.Single(d.Llamadas);
+            Assert.Equal("abc", llamada.Contenedor);
+            Assert.Equal(new[] { "63" }, llamada.Args);
+            Assert.StartsWith("kill -TERM \"$1\"", llamada.Script);
+            Assert.EndsWith("kill -KILL \"$1\"", llamada.Script);
+        }
+
+        [Fact]
         public void Preparar_avisa_si_no_hay_python_y_si_lo_hay_copia_e_instala()
         {
             var sinPython = new DockerFalso { Responder = (_, s) => s.StartsWith("command -v") ? (1, "") : (0, "") };

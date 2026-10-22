@@ -77,6 +77,13 @@ namespace Herdview.Modelo
         private static bool Mismo(IReadOnlyDictionary<int, ProcesoVivo> tabla, ProcesoAncestro p) =>
             tabla.TryGetValue(p.Pid, out var vivo) && string.Equals(vivo.Exe, p.Exe, StringComparison.OrdinalIgnoreCase);
 
+        /// <summary>El PID del Claude de la sesión en Windows, si sigue vivo y es el mismo programa (0 si no).</summary>
+        public static int PidClaude(Sesion s, IReadOnlyDictionary<int, ProcesoVivo> tabla)
+        {
+            int i = IndiceClaude(s.Procesos);
+            return i >= 0 && Mismo(tabla, s.Procesos[i]) ? s.Procesos[i].Pid : 0;
+        }
+
         /// <summary>La sesión está viva si su proceso de Claude existe y sigue siendo el mismo programa (los PID se
         /// reutilizan). Sin cadena no se puede saber: se da por viva.</summary>
         public static bool Viva(Sesion s, IReadOnlyDictionary<int, ProcesoVivo> tabla)

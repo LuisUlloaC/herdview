@@ -33,6 +33,9 @@ cuáles te esperan y cuáles terminaron. Funciona igual con la terminal que con 
 
   ![Nueva sesión en Docker](docs/img/nueva-docker.png)
 
+- **Cerrar sesiones** («Cerrar» en el panel, ✕ en la ventana, con confirmación): en Windows, Ctrl+C a la consola de la
+  sesión, como si lo pulsaras tú, para que Claude salga ordenadamente (y a la fuerza, con todo lo que cuelga de él, si
+  a los 4 s sigue vivo); en un contenedor, `kill -TERM` al Claude de dentro (y `-KILL` si no sale).
 - **Notificaciones** de Windows cuando una sesión termina o te espera (no si ya estás en su ventana). Al pulsarla se
   abre el panel con el cursor en la caja de esa sesión.
 - Las sesiones de Claude que aún no han pasado por el hook también salen, en gris, como «sin datos».

@@ -14,8 +14,10 @@ namespace Herdview
         private string _nota = "";
         private readonly Func<SesionVM, string, bool> _enviar;
 
-        public SesionVM(Sesion sesion, Action<SesionVM> enfocar, Func<SesionVM, string, bool> enviar)
+        public SesionVM(Sesion sesion, Action<SesionVM> enfocar, Func<SesionVM, string, bool> enviar,
+            Action<SesionVM>? cerrar = null)
         {
+            Cerrar = new Orden(() => cerrar?.Invoke(this));
             _sesion = sesion;
             _enviar = enviar;
             Enfocar = new Orden(() => enfocar(this));
@@ -33,6 +35,7 @@ namespace Herdview
         public string NombreEstado => Panorama.NombreEstado(_sesion.Estado);
         public string Tiempo => _tiempo;
         public ICommand Enfocar { get; }
+        public ICommand Cerrar { get; }
 
         private Consumo? _consumo;
 
@@ -111,6 +114,13 @@ namespace Herdview
                 _tiempo = t;
                 Avisar(nameof(Tiempo));
             }
+        }
+
+        /// <summary>Una nota bajo la sesión (lo que pasó con el último mensaje, «Cerrando…»).</summary>
+        public void PonerNota(string nota)
+        {
+            _nota = nota;
+            Avisar(nameof(Nota));
         }
 
         private void Avisar(string propiedad) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propiedad));

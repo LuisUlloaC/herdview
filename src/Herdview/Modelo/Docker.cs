@@ -66,6 +66,19 @@ namespace Herdview.Modelo
         public static bool Enviar(IDocker docker, Sesion s, string texto) =>
             docker.Sh(s.ContenedorId, "python3 " + Hook + " enviar \"$1\"", texto, s.Id).Codigo == 0;
 
+        /// <summary>Cierra el Claude de la sesión dentro del contenedor: TERM (sale ordenadamente) y, si en 3 s sigue,
+        /// KILL. Con el PID desconocido no hace nada.</summary>
+        public static bool Cerrar(IDocker docker, Sesion s)
+        {
+            if (s.PidClaude <= 0)
+            {
+                return false;
+            }
+            const string script = "kill -TERM \"$1\" 2>/dev/null || exit 0; for i in 1 2 3 4 5 6; do " +
+                "kill -0 \"$1\" 2>/dev/null || exit 0; sleep 0.5; done; kill -KILL \"$1\"";
+            return docker.Sh(s.ContenedorId, script, null, s.PidClaude.ToString(System.Globalization.CultureInfo.InvariantCulture)).Codigo == 0;
+        }
+
         public enum Preparacion { Lista, SinPython, Fallo }
 
         /// <summary>Copia el hook en el contenedor (siempre: así se actualiza) y lo registra en su Claude Code.</summary>

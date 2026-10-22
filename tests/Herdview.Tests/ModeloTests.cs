@@ -94,6 +94,16 @@ namespace Herdview.Tests
         }
 
         [Fact]
+        public void El_pid_de_claude_solo_si_sigue_siendo_claude()
+        {
+            var s = Sesion.Leer(Json)!;
+            var p = new ProcesosFalsos();
+            Assert.Equal(0, Procesos.PidClaude(s, p.Tabla()));
+            p.Vivo(11, 12, "claude.exe");
+            Assert.Equal(11, Procesos.PidClaude(s, p.Tabla()));
+        }
+
+        [Fact]
         public void La_ventana_es_la_primera_subiendo_desde_claude()
         {
             var s = Sesion.Leer(Json)!;

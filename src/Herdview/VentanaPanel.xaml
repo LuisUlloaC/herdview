@@ -78,12 +78,18 @@
                                 </Grid>
                             </Button>
                             <!-- Escribirle sin cambiar de ventana: lo recoge el hook de la sesión y la despierta. -->
-                            <Grid x:Name="Escribir" Margin="31,0,10,0">
+                            <DockPanel Margin="31,0,10,0">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource BotonPlano}" Command="{Binding Cerrar}"
+                                    VerticalAlignment="Top" Margin="6,0,0,0" ToolTip="Cerrar esta sesión de Claude">
+                                <TextBlock Text="Cerrar" Foreground="{StaticResource BrApagada}" FontSize="11.5" Margin="8,6" />
+                            </Button>
+                            <Grid x:Name="Escribir">
                                 <TextBox x:Name="Caja" Style="{StaticResource Caja}" PreviewKeyDown="AlTeclearCaja" />
                                 <TextBlock x:Name="Pista" Text="Escríbele…  (Enter envía · Mayús+Enter, salto de línea)"
                                            Foreground="{StaticResource BrApagada}" FontSize="12" Margin="9,5,0,0"
                                            IsHitTestVisible="False" Visibility="Collapsed" />
                             </Grid>
+                            </DockPanel>
                             <TextBlock x:Name="Nota" Text="{Binding Nota}" FontSize="11" Margin="32,3,10,0"
                                        Foreground="{StaticResource BrTerminado}" />
                             </StackPanel>

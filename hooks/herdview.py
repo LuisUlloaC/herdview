@@ -246,7 +246,7 @@ def esperar(evento: dict, limite: float, pausa: float = 1.0) -> int:
             try:
                 os.replace(mensajes, leyendo)
                 with open(leyendo, encoding="utf-8") as fh:
-                    texto = fh.read().strip()
+                    texto = fh.read().lstrip("﻿").strip()
                 os.remove(leyendo)
             except OSError:
                 texto = ""
@@ -407,6 +407,7 @@ def listar(ahora: float, gracia: float = 20) -> list:
 
 def enviar(session_id: str, texto: str) -> None:
     """Orden `enviar`: deja el mensaje en el buzón de la sesión (se suma a lo que aún no haya recogido)."""
+    texto = texto.lstrip("﻿")  # .NET Framework antepone la marca BOM al escribir por la entrada de docker
     ruta = buzon_de(session_id, ".txt")
     previo = ""
     try:
