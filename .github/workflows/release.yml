@@ -1,0 +1,55 @@
+# Al empujar un tag vX.Y.Z: pasa los tests (hook y app), compila Cabina.exe con esa versión y lo publica en una
+# release de GitHub junto a un .zip con el exe, el hook y el README. A mano (workflow_dispatch) solo compila y deja el
+# resultado como artefacto de la ejecución.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compilar:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+
+      - name: Versión
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then version="${GITHUB_REF_NAME#v}"; else version="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Tests y compilación
+        shell: pwsh
+        run: ./compilar.ps1 -Version $env:VERSION
+
+      - name: Paquete
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory paquete | Out-Null
+          Copy-Item dist/Cabina.exe, hooks/cabina.py, README.md paquete/
+          Compress-Archive paquete/* "Cabina-$env:VERSION.zip"
+
+      - name: Release de GitHub
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: gh release create "$GITHUB_REF_NAME" dist/Cabina.exe "Cabina-$VERSION.zip" --title "Cabina $GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Artefacto (ejecución manual)
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v7
+        with:
+          name: Cabina-${{ env.VERSION }}
+          path: Cabina-${{ env.VERSION }}.zip

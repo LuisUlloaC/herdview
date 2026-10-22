@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>Cabina</AssemblyName>
+    <RootNamespace>Cabina</RootNamespace>
+    <ApplicationIcon>icono.ico</ApplicationIcon>
+    <!-- La release la sobrescribe con el tag (compilar.ps1 -Version). -->
+    <Version>0.1.0</Version>
+    <Product>Cabina</Product>
+    <Description>Todas las sesiones de Claude Code del PC de un vistazo</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Runtime.Serialization" />
+  </ItemGroup>
+</Project>

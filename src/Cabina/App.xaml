@@ -1,0 +1,8 @@
+<Application x:Class="Cabina.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown" Startup="AlArrancar" Exit="AlSalir">
+    <Application.Resources>
+        <ResourceDictionary Source="Tema.xaml" />
+    </Application.Resources>
+</Application>
