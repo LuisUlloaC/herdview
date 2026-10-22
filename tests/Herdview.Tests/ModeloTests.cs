@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Cabina.Modelo;
+using Herdview.Modelo;
 using Xunit;
 
-namespace Cabina.Tests
+namespace Herdview.Tests
 {
     public class ModeloTests
     {
@@ -146,7 +146,7 @@ namespace Cabina.Tests
         [Fact]
         public void El_almacen_borra_las_sesiones_muertas_pasada_la_gracia()
         {
-            string carpeta = Path.Combine(Path.GetTempPath(), "cabina-test-" + Guid.NewGuid().ToString("N"));
+            string carpeta = Path.Combine(Path.GetTempPath(), "herdview-test-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(carpeta);
             try
             {

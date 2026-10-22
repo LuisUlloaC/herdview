@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Cabina.Modelo
+namespace Herdview.Modelo
 {
     /// <summary>La carpeta donde el hook deja un JSON por sesión. Lee todas, borra las de sesiones cuyo Claude ya no
     /// existe (se cerró la ventana sin SessionEnd) y avisa cuando algo cambia.</summary>
@@ -23,7 +23,7 @@ namespace Cabina.Modelo
         }
 
         public static string CarpetaPorDefecto =>
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Cabina", "sesiones");
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Herdview", "sesiones");
 
         /// <summary>Se lanza (en un hilo del sistema) cuando cambia algún fichero de la carpeta.</summary>
         public event EventHandler? Cambio;

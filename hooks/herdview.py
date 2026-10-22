@@ -1,10 +1,10 @@
-"""Hook de Claude Code para Cabina: anota en un JSON por sesión qué está haciendo cada instancia de Claude.
+"""Hook de Claude Code para Herdview: anota en un JSON por sesión qué está haciendo cada instancia de Claude.
 
 Se registra (asíncrono) en SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Notification, Stop y SessionEnd:
 
-    python -I <ruta>/cabina.py            (y en Stop, además: python -I <ruta>/cabina.py esperar)
+    python -I <ruta>/herdview.py            (y en Stop, además: python -I <ruta>/herdview.py esperar)
 
-Lee el evento de stdin y escribe %LOCALAPPDATA%\\Cabina\\sesiones\\<session_id>.json, que la app lee. Un fallo aquí
+Lee el evento de stdin y escribe %LOCALAPPDATA%\\Herdview\\sesiones\\<session_id>.json, que la app lee. Un fallo aquí
 nunca debe molestar a la sesión: siempre sale con 0.
 """
 import ctypes
@@ -15,9 +15,9 @@ import re
 import sys
 import time
 
-CARPETA = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), "Cabina", "sesiones")
-## Lo que el usuario escribe desde Cabina: <sesión>.txt; <sesión>.espera marca la espera activa (una por sesión).
-BUZON = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), "Cabina", "buzon")
+CARPETA = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), "Herdview", "sesiones")
+## Lo que el usuario escribe desde Herdview: <sesión>.txt; <sesión>.espera marca la espera activa (una por sesión).
+BUZON = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), "Herdview", "buzon")
 ## Algo menos que el timeout del hook en settings (43200 s): al llegar, la espera acaba sola sin error.
 DURACION_ESPERA = 43000
 LARGO_PEDIDO = 240
@@ -175,7 +175,7 @@ def cancelar_espera(session_id: str) -> None:
 
 
 def esperar(evento: dict, limite: float, pausa: float = 1.0) -> int:
-    """Modo `esperar` (Stop, asyncRewake): se queda mirando el buzón de la sesión. Si el usuario escribe desde Cabina, anota
+    """Modo `esperar` (Stop, asyncRewake): se queda mirando el buzón de la sesión. Si el usuario escribe desde Herdview, anota
     el pedido y sale con 2 y el mensaje en stderr, lo que despierta a Claude aunque esté parado. Sale con 0 sin hacer
     nada si otra espera de la misma sesión la sustituye, si el usuario escribe en la propia ventana (UserPromptSubmit borra
     la marca) o al llegar al límite."""
@@ -198,7 +198,7 @@ def esperar(evento: dict, limite: float, pausa: float = 1.0) -> int:
             if texto:
                 cancelar_espera(sid)
                 registrar(dict(evento, hook_event_name="UserPromptSubmit", prompt=texto), time.time())
-                sys.stderr.write("Tu usuario te escribe desde Cabina (contéstale como a un mensaje suyo normal):\n\n" + texto)
+                sys.stderr.write("Tu usuario te escribe desde Herdview (contéstale como a un mensaje suyo normal):\n\n" + texto)
                 return 2
         try:
             with open(marca, encoding="utf-8") as fh:
@@ -255,6 +255,6 @@ if __name__ == "__main__":
     try:
         codigo = main()
     except Exception as error:  # nunca molestar a la sesión (un 2 aquí la despertaría con el error)
-        print("cabina: %s" % error, file=sys.stderr)
+        print("herdview: %s" % error, file=sys.stderr)
         codigo = 0
     sys.exit(codigo)

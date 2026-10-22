@@ -1,7 +1,7 @@
-<Window x:Class="Cabina.VentanaPanel"
+<Window x:Class="Herdview.VentanaPanel"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Cabina" Width="440" SizeToContent="Height" MaxHeight="640" WindowStyle="None" ResizeMode="NoResize"
+        Title="Herdview" Width="440" SizeToContent="Height" MaxHeight="640" WindowStyle="None" ResizeMode="NoResize"
         ShowInTaskbar="False" Topmost="True" Background="{StaticResource BrFondo}" FontFamily="{StaticResource FuenteUi}"
         Foreground="{StaticResource BrTexto}" BorderBrush="{StaticResource BrBorde}" BorderThickness="1">
     <DockPanel>
@@ -12,7 +12,7 @@
                     <TextBlock Text="✕" Foreground="{StaticResource BrTenue}" FontSize="12" Margin="8,3" />
                 </Button>
                 <StackPanel>
-                    <TextBlock Text="CABINA" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrTenue}" />
+                    <TextBlock Text="HERDVIEW" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrTenue}" />
                     <TextBlock x:Name="Resumen" FontSize="15" FontWeight="SemiBold" Margin="0,2,0,0" />
                 </StackPanel>
             </DockPanel>

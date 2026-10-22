@@ -1,4 +1,4 @@
-# Cabina
+# Herdview
 
 Todas las sesiones de [Claude Code](https://code.claude.com) abiertas en tu PC, de un vistazo: qué hace cada una,
 cuáles te esperan y cuáles terminaron. Funciona igual con la terminal que con la extensión de VS Code. Solo Windows.
@@ -19,31 +19,31 @@ cuáles te esperan y cuáles terminaron. Funciona igual con la terminal que con 
 
 ## Instalación
 
-1. Descarga `Cabina.exe` y `cabina.py` de la [última release](../../releases/latest) (o el `.zip`). Hace falta
+1. Descarga `Herdview.exe` y `herdview.py` de la [última release](../../releases/latest) (o el `.zip`). Hace falta
    .NET Framework 4.7.2 (viene con Windows 10/11) y Python 3 en el `PATH`.
-2. Deja `cabina.py` en una carpeta fija y regístralo como hook en tu `settings.json` de Claude Code
+2. Deja `herdview.py` en una carpeta fija y regístralo como hook en tu `settings.json` de Claude Code
    (`%USERPROFILE%\.claude\settings.json`), cambiando la ruta por la tuya. Si ya tienes hooks, añade estas entradas
    a las que haya:
 
    ```json
    {
      "hooks": {
-       "SessionStart":     [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/cabina.py\"", "timeout": 20, "async": true }] }],
-       "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/cabina.py\"", "timeout": 20, "async": true }] }],
-       "PreToolUse":       [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/cabina.py\"", "timeout": 20, "async": true }] }],
-       "PostToolUse":      [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/cabina.py\"", "timeout": 20, "async": true }] }],
-       "Notification":     [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/cabina.py\"", "timeout": 20, "async": true }] }],
-       "SessionEnd":       [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/cabina.py\"", "timeout": 20, "async": true }] }],
+       "SessionStart":     [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/herdview.py\"", "timeout": 20, "async": true }] }],
+       "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/herdview.py\"", "timeout": 20, "async": true }] }],
+       "PreToolUse":       [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/herdview.py\"", "timeout": 20, "async": true }] }],
+       "PostToolUse":      [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/herdview.py\"", "timeout": 20, "async": true }] }],
+       "Notification":     [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/herdview.py\"", "timeout": 20, "async": true }] }],
+       "SessionEnd":       [{ "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/herdview.py\"", "timeout": 20, "async": true }] }],
        "Stop": [
-         { "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/cabina.py\"", "timeout": 20, "async": true }] },
-         { "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/cabina.py\" esperar", "timeout": 43200, "asyncRewake": true }] }
+         { "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/herdview.py\"", "timeout": 20, "async": true }] },
+         { "hooks": [{ "type": "command", "command": "python -I \"C:/ruta/herdview.py\" esperar", "timeout": 43200, "asyncRewake": true }] }
        ]
      }
    }
    ```
 
-   La segunda entrada de `Stop` es la que permite escribir a las sesiones desde Cabina; si no la quieres, quítala.
-3. Abre `Cabina.exe`. Las sesiones ya abiertas aparecen en cuanto hacen algo (o reinícialas / abre `/hooks` en ellas
+   La segunda entrada de `Stop` es la que permite escribir a las sesiones desde Herdview; si no la quieres, quítala.
+3. Abre `Herdview.exe`. Las sesiones ya abiertas aparecen en cuanto hacen algo (o reinícialas / abre `/hooks` en ellas
    para que lean la configuración nueva). En el panel puedes activar «Arrancar con Windows».
 
 El ejecutable no está firmado: la primera vez Windows SmartScreen puede pedirte confirmación («Más información» →
@@ -51,10 +51,10 @@ El ejecutable no está firmado: la primera vez Windows SmartScreen puede pedirte
 
 ## Cómo funciona
 
-- `cabina.py` escribe un JSON por sesión en `%LOCALAPPDATA%\Cabina\sesiones\` con su estado, lo último que pediste,
-  la herramienta que está usando y la cadena de procesos hasta su ventana. Cabina solo lee esa carpeta: no abre
+- `herdview.py` escribe un JSON por sesión en `%LOCALAPPDATA%\Herdview\sesiones\` con su estado, lo último que pediste,
+  la herramienta que está usando y la cadena de procesos hasta su ventana. Herdview solo lee esa carpeta: no abre
   puertos ni usa la red.
-- Para escribirle a una sesión, Cabina deja el texto en `%LOCALAPPDATA%\Cabina\buzon\<sesión>.txt`. El hook
+- Para escribirle a una sesión, Herdview deja el texto en `%LOCALAPPDATA%\Herdview\buzon\<sesión>.txt`. El hook
   `esperar` (en `Stop`, con `asyncRewake`) vigila ese buzón mientras la sesión está parada y, al llegar un mensaje,
   sale con código 2 y el texto: Claude Code despierta a la sesión con él. A Claude le llega como aviso de un hook,
   no como un mensaje tuyo normal. Cualquier programa que corra con tu usuario podría escribir en ese buzón.
@@ -66,8 +66,8 @@ El ejecutable no está firmado: la primera vez Windows SmartScreen puede pedirte
 powershell -File compilar.ps1 [-Version 1.2.3]
 ```
 
-Pasa los tests del hook (Python) y de la app (xUnit) y deja `dist\Cabina.exe` (.NET Framework 4.7.2, portable).
-Hace falta el SDK de .NET que fija `global.json`. `Cabina.exe --captura <carpeta>` pinta la tira y el panel con datos
+Pasa los tests del hook (Python) y de la app (xUnit) y deja `dist\Herdview.exe` (.NET Framework 4.7.2, portable).
+Hace falta el SDK de .NET que fija `global.json`. `Herdview.exe --captura <carpeta>` pinta la tira y el panel con datos
 de ejemplo a PNG sin abrir ventanas; `tools\generar-icono.ps1` regenera el icono.
 
 Al empujar un tag `vX.Y.Z`, el workflow `Release` compila y publica el `.exe` y el `.zip` en una release de GitHub.

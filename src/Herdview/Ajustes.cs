@@ -4,21 +4,21 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using Microsoft.Win32;
 
-namespace Cabina
+namespace Herdview
 {
     /// <summary>Preferencias del usuario: dónde va la tira y si se ve. Arrancar con Windows vive en el registro (Run).</summary>
     [DataContract]
     public sealed class Ajustes
     {
         private const string ClaveRun = @"Software\Microsoft\Windows\CurrentVersion\Run";
-        private const string NombreRun = "Cabina";
+        private const string NombreRun = "Herdview";
 
         [DataMember(Name = "tira_visible")] public bool TiraVisible { get; set; } = true;
         [DataMember(Name = "tira_x")] public double? TiraX { get; set; }
         [DataMember(Name = "tira_y")] public double? TiraY { get; set; }
 
         private static string Ruta =>
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Cabina", "ajustes.json");
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Herdview", "ajustes.json");
 
         public static Ajustes Cargar()
         {

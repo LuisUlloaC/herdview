@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Herdview/Herdview.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Herdview.Tests/Herdview.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,6 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:m="clr-namespace:Cabina.Modelo">
+                    xmlns:m="clr-namespace:Herdview.Modelo">
 
     <!-- Una cabina de noche: fondo casi negro, texto cálido y cada sesión es una luz del tablero. -->
     <Color x:Key="ColFondo">#16181C</Color>

@@ -1,4 +1,4 @@
-# Al empujar un tag vX.Y.Z: pasa los tests (hook y app), compila Cabina.exe con esa versión y lo publica en una
+# Al empujar un tag vX.Y.Z: pasa los tests (hook y app), compila Herdview.exe con esa versión y lo publica en una
 # release de GitHub junto a un .zip con el exe, el hook y el README. A mano (workflow_dispatch) solo compila y deja el
 # resultado como artefacto de la ejecución.
 name: Release
@@ -37,13 +37,13 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory paquete | Out-Null
-          Copy-Item dist/Cabina.exe, hooks/cabina.py, README.md paquete/
-          Compress-Archive paquete/* "Cabina-$env:VERSION.zip"
+          Copy-Item dist/Herdview.exe, hooks/herdview.py, README.md paquete/
+          Compress-Archive paquete/* "Herdview-$env:VERSION.zip"
 
       - name: Release de GitHub
         if: github.ref_type == 'tag'
         shell: bash
-        run: gh release create "$GITHUB_REF_NAME" dist/Cabina.exe "Cabina-$VERSION.zip" --title "Cabina $GITHUB_REF_NAME" --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" dist/Herdview.exe "Herdview-$VERSION.zip" --title "Herdview $GITHUB_REF_NAME" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -51,5 +51,5 @@ jobs:
         if: github.ref_type != 'tag'
         uses: actions/upload-artifact@v7
         with:
-          name: Cabina-${{ env.VERSION }}
-          path: Cabina-${{ env.VERSION }}.zip
+          name: Herdview-${{ env.VERSION }}
+          path: Herdview-${{ env.VERSION }}.zip

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
-namespace Cabina.Modelo
+namespace Herdview.Modelo
 {
     public enum EstadoSesion
     {
@@ -22,7 +22,7 @@ namespace Cabina.Modelo
         [DataMember(Name = "exe")] public string Exe { get; set; } = "";
     }
 
-    /// <summary>Lo que el hook (hooks/cabina.py) escribe de cada sesión de Claude en su JSON.</summary>
+    /// <summary>Lo que el hook (hooks/herdview.py) escribe de cada sesión de Claude en su JSON.</summary>
     [DataContract]
     public sealed class Sesion
     {

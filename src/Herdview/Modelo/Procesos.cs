@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Cabina.Modelo
+namespace Herdview.Modelo
 {
     public sealed class VentanaInfo
     {

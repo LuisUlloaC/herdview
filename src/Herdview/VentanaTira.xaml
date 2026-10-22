@@ -1,7 +1,7 @@
-<Window x:Class="Cabina.VentanaTira"
+<Window x:Class="Herdview.VentanaTira"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Cabina" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Title="Herdview" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
         SizeToContent="WidthAndHeight" FontFamily="{StaticResource FuenteUi}">
     <Border Background="{StaticResource BrFondoTira}" BorderBrush="{StaticResource BrBorde}" BorderThickness="1"

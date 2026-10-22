@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 
-namespace Cabina
+namespace Herdview
 {
     /// <summary>La tira siempre encima: una ficha por sesión activa. Nunca se activa ni roba el foco (no sale en Alt+Tab
     /// ni en la barra de tareas); clic en una ficha trae la ventana de esa sesión; el asa la mueve o abre el panel.</summary>

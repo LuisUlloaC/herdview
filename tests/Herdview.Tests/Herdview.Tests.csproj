@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Cabina.Tests</RootNamespace>
+    <RootNamespace>Herdview.Tests</RootNamespace>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="xunit.v3" Version="4.0.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Cabina\Cabina.csproj" />
+    <ProjectReference Include="..\..\src\Herdview\Herdview.csproj" />
   </ItemGroup>
 </Project>

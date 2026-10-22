@@ -1,5 +1,5 @@
-# Dibuja el icono de Cabina (un tablero de cabina de noche: dial con aguja y las tres luces de estado) y lo guarda
-# como src\Cabina\icono.ico con varios tamaños (PNG dentro del ICO). En 16-24 px solo van las luces.
+# Dibuja el icono de Herdview (un tablero de cabina de noche: dial con aguja y las tres luces de estado) y lo guarda
+# como src\Herdview\icono.ico con varios tamaños (PNG dentro del ICO). En 16-24 px solo van las luces.
 #   powershell -File tools\generar-icono.ps1 [-Muestras <carpeta>]   (Muestras: deja también cada tamaño en PNG)
 param([string]$Muestras = '')
 $ErrorActionPreference = 'Stop'
@@ -11,7 +11,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 
-public static class IconoCabina
+public static class IconoHerdview
 {
     static readonly Color Fondo = Color.FromArgb(0x1C, 0x1F, 0x25);
     static readonly Color FondoAlto = Color.FromArgb(0x2A, 0x2E, 0x37);
@@ -135,6 +135,6 @@ public static class IconoCabina
 
 $raiz = Split-Path -Parent $PSScriptRoot
 if ($Muestras) { New-Item -ItemType Directory -Force $Muestras | Out-Null }
-$ico = Join-Path $raiz 'src\Cabina\icono.ico'
-[IconoCabina]::Ico($ico, [int[]](16, 20, 24, 32, 40, 48, 64, 128, 256), $Muestras)
+$ico = Join-Path $raiz 'src\Herdview\icono.ico'
+[IconoHerdview]::Ico($ico, [int[]](16, 20, 24, 32, 40, 48, 64, 128, 256), $Muestras)
 Write-Host "Icono: $ico"

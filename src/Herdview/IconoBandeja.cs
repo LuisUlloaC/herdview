@@ -2,9 +2,9 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
-using Cabina.Modelo;
+using Herdview.Modelo;
 
-namespace Cabina
+namespace Herdview
 {
     /// <summary>El icono de la bandeja es una luz de la cabina: del color del estado más urgente, apagada si no hay nada.</summary>
     internal static class IconoBandeja

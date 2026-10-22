@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Cabina
+namespace Herdview
 {
     /// <summary>El panel completo, como un menú de la bandeja: se abre junto al reloj y se esconde al perder el foco.</summary>
     public partial class VentanaPanel : Window

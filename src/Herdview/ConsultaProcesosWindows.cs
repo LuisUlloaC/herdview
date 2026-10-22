@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using Cabina.Modelo;
+using Herdview.Modelo;
 
-namespace Cabina
+namespace Herdview
 {
     /// <summary>Los procesos y ventanas reales del PC por Win32: foto de procesos (Toolhelp), ventanas por proceso
     /// (EnumWindows) y la carpeta de trabajo leída del bloque de proceso (PEB) de un proceso de 64 bits.</summary>

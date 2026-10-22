@@ -1,14 +1,14 @@
 using System;
 using System.IO;
 using System.Text;
-using Cabina.Modelo;
+using Herdview.Modelo;
 using Xunit;
 
-namespace Cabina.Tests
+namespace Herdview.Tests
 {
     public class BuzonTests : IDisposable
     {
-        private readonly string _carpeta = Path.Combine(Path.GetTempPath(), "cabina-buzon-" + Guid.NewGuid().ToString("N"));
+        private readonly string _carpeta = Path.Combine(Path.GetTempPath(), "herdview-buzon-" + Guid.NewGuid().ToString("N"));
 
         public void Dispose()
         {

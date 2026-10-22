@@ -4,11 +4,11 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Cabina.Modelo;
+using Herdview.Modelo;
 
-namespace Cabina
+namespace Herdview
 {
-    /// <summary>`Cabina.exe --captura &lt;carpeta&gt;`: pinta la tira y el panel con sesiones de ejemplo a PNG, sin abrir
+    /// <summary>`Herdview.exe --captura &lt;carpeta&gt;`: pinta la tira y el panel con sesiones de ejemplo a PNG, sin abrir
     /// ninguna ventana (para revisar el diseño sin abrir nada en pantalla).</summary>
     internal static class Captura
     {

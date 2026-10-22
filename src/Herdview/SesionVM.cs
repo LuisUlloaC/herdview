@@ -1,9 +1,9 @@
 using System;
 using System.ComponentModel;
 using System.Windows.Input;
-using Cabina.Modelo;
+using Herdview.Modelo;
 
-namespace Cabina
+namespace Herdview
 {
     /// <summary>Una sesión tal como se pinta en la tira y en el panel. Se actualiza en su sitio para no parpadear.</summary>
     public sealed class SesionVM : INotifyPropertyChanged

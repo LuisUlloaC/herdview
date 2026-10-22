@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Cabina.Modelo
+namespace Herdview.Modelo
 {
     /// <summary>Reglas de qué se enseña y cómo: orden, estado de conjunto (bandeja) y textos de tiempo.</summary>
     public static class Panorama

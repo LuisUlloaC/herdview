@@ -3,14 +3,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Cabina.Modelo
+namespace Herdview.Modelo
 {
-    /// <summary>Lo que el usuario escribe a una sesión desde Cabina: `buzon\&lt;sesión&gt;.txt`. El hook de la sesión
-    /// (cabina.py esperar, en Stop con asyncRewake) lo recoge y despierta a Claude con él.</summary>
+    /// <summary>Lo que el usuario escribe a una sesión desde Herdview: `buzon\&lt;sesión&gt;.txt`. El hook de la sesión
+    /// (herdview.py esperar, en Stop con asyncRewake) lo recoge y despierta a Claude con él.</summary>
     public static class Buzon
     {
         public static string CarpetaPorDefecto =>
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Cabina", "buzon");
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Herdview", "buzon");
 
         /// <summary>El mismo nombre de fichero que usa el hook (solo letras, cifras, «-» y «_»).</summary>
         public static string RutaDe(string carpeta, string sesionId)

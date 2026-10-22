@@ -5,10 +5,10 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
-using Cabina.Modelo;
+using Herdview.Modelo;
 using Forms = System.Windows.Forms;
 
-namespace Cabina
+namespace Herdview
 {
     /// <summary>Junta todo: lee las sesiones que anota el hook, las pinta en la tira, el panel y la bandeja, y al hacer
     /// clic en una trae su ventana. Una sola instancia.</summary>
@@ -43,7 +43,7 @@ namespace Cabina
                 Shutdown();
                 return;
             }
-            _unica = new Mutex(true, @"Local\Cabina.Claude", out bool primera);
+            _unica = new Mutex(true, @"Local\Herdview.Claude", out bool primera);
             if (!primera)
             {
                 Shutdown();
@@ -277,7 +277,7 @@ namespace Cabina
                 viejo?.Dispose();
                 _globalPintado = true;
             }
-            string texto = "Cabina · " + resumen;
+            string texto = "Herdview · " + resumen;
             _bandeja.Text = texto.Length > 63 ? texto.Substring(0, 63) : texto;
         }
 
@@ -341,7 +341,7 @@ namespace Cabina
             _bandeja = new Forms.NotifyIcon
             {
                 Icon = IconoBandeja.Crear(null),
-                Text = "Cabina",
+                Text = "Herdview",
                 ContextMenuStrip = menu,
                 Visible = true,
             };

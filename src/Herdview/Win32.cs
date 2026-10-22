@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Cabina
+namespace Herdview
 {
     internal static class Win32
     {

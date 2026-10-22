@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
-using Cabina.Modelo;
+using Herdview.Modelo;
 using Xunit;
 
-namespace Cabina.Tests
+namespace Herdview.Tests
 {
     public class AvisadorTests
     {

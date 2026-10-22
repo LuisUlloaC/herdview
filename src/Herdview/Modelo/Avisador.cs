@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 
-namespace Cabina.Modelo
+namespace Herdview.Modelo
 {
     /// <summary>Decide qué sesiones merecen notificación: las que acaban de pasar a «terminó» o a «te espera». La primera
-    /// carga solo toma nota (no avisa de lo que ya estaba así al abrir Cabina) y no repite el mismo aviso de una sesión
+    /// carga solo toma nota (no avisa de lo que ya estaba así al abrir Herdview) y no repite el mismo aviso de una sesión
     /// en poco tiempo (un hook de Stop que la hace seguir la termina dos veces seguidas).</summary>
     public sealed class Avisador
     {
