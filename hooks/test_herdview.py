@@ -71,6 +71,12 @@ class Actividad(unittest.TestCase):
         self.assertEqual(herdview.actividad("mcp__claude_ai_Docs__read", {}), "read")
         self.assertTrue(herdview.actividad("Bash", {"command": "x" * 500}).endswith("…"))
 
+    def test_cuenta(self):
+        self.assertEqual(herdview.cuenta(r"C:\Users\ana\.claude-alt"), "alt")
+        self.assertEqual(herdview.cuenta(r"C:\Users\ana\.claude-trabajo\\"), "trabajo")
+        self.assertEqual(herdview.cuenta(""), "normal")
+        self.assertEqual(herdview.cuenta(r"C:\Users\ana\.claude"), "normal")
+
 
 class Buzon(unittest.TestCase):
     def setUp(self):

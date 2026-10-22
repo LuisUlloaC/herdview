@@ -19,6 +19,12 @@ cuáles te esperan y cuáles terminaron. Funciona igual con la terminal que con 
 
   ![Ventana](docs/img/ventana.png)
 
+- **Abrir sesiones nuevas** («+ Nueva sesión» en la ventana, «+ Nueva» en el panel o en el menú de la bandeja):
+  eliges la carpeta (o una de las recientes), la cuenta de Claude Code (`.claude` y cada `.claude-<nombre>`, vía
+  `CLAUDE_CONFIG_DIR`) y, si quieres, el primer pedido; se abre una pestaña de Windows Terminal con Claude arrancado.
+
+  ![Nueva sesión](docs/img/nueva.png)
+
 - **Notificaciones** de Windows cuando una sesión termina o te espera (no si ya estás en su ventana). Al pulsarla se
   abre el panel con el cursor en la caja de esa sesión.
 - Las sesiones de Claude que aún no han pasado por el hook también salen, en gris, como «sin datos».
@@ -49,6 +55,8 @@ cuáles te esperan y cuáles terminaron. Funciona igual con la terminal que con 
    ```
 
    La segunda entrada de `Stop` es la que permite escribir a las sesiones desde Herdview; si no la quieres, quítala.
+   Si usas varias cuentas (carpetas `.claude-<nombre>` con `CLAUDE_CONFIG_DIR`), pon los hooks en el `settings.json`
+   de cada una: la sesión sale con su cuenta («Terminal · trabajo»).
 3. Abre `Herdview.exe`. Las sesiones ya abiertas aparecen en cuanto hacen algo (o reinícialas / abre `/hooks` en ellas
    para que lean la configuración nueva). En el panel puedes activar «Arrancar con Windows».
 

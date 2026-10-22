@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
@@ -16,6 +17,10 @@ namespace Herdview
         [DataMember(Name = "tira_visible")] public bool TiraVisible { get; set; } = true;
         [DataMember(Name = "tira_x")] public double? TiraX { get; set; }
         [DataMember(Name = "tira_y")] public double? TiraY { get; set; }
+        /// <summary>Carpetas donde se ha abierto Claude, la más reciente primero.</summary>
+        [DataMember(Name = "recientes")] public List<string>? Recientes { get; set; }
+        /// <summary>La cuenta con la que se abrió la última sesión desde Herdview.</summary>
+        [DataMember(Name = "ultima_cuenta")] public string? UltimaCuenta { get; set; }
 
         private static string Ruta =>
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Herdview", "ajustes.json");

@@ -25,6 +25,9 @@
                     <TextBlock Text="Salir" Foreground="{StaticResource BrTenue}" FontSize="12" Margin="8,4" />
                 </Button>
                 <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource BotonPlano}" Click="AlNuevaSesion" ToolTip="Abrir Claude en una carpeta">
+                        <TextBlock Text="+ Nueva" Foreground="{StaticResource BrTrabajando}" FontSize="12" Margin="8,4" />
+                    </Button>
                     <Button Style="{StaticResource BotonPlano}" Click="AlAbrirVentana" ToolTip="Todas las sesiones con su consumo de tokens">
                         <TextBlock Text="Ventana" Foreground="{StaticResource BrTexto}" FontSize="12" Margin="8,4" />
                     </Button>

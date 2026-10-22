@@ -26,7 +26,8 @@ namespace Herdview
         public Sesion Sesion => _sesion;
         public string Id => _sesion.Id;
         public string Proyecto => string.IsNullOrEmpty(_sesion.Proyecto) ? "Claude" : _sesion.Proyecto;
-        public string Origen => _sesion.Origen;
+        /// <summary>«Terminal · alt»: dónde corre y con qué cuenta.</summary>
+        public string Origen => _sesion.Cuenta.Length > 0 ? _sesion.Origen + " · " + _sesion.Cuenta : _sesion.Origen;
         /// <summary>El estado tal como se pinta (lo terminado ya visto, apagado).</summary>
         public EstadoSesion Estado => Panorama.Visual(_sesion, _vista);
         public string NombreEstado => Panorama.NombreEstado(_sesion.Estado);

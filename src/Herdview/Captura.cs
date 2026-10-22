@@ -56,6 +56,12 @@ namespace Herdview
             ventana.Pintar("1 te espera · 1 trabajando · 1 terminó", todas);
             Guardar((FrameworkElement)ventana.Content, Path.Combine(carpeta, "ventana.png"), ventana.Width,
                 (Brush)Application.Current.Resources["BrFondo"]);
+
+            var nueva = new VentanaNueva(new[] { @"C:\proyectos\api-pagos", @"C:\proyectos\juego-3d", @"C:\proyectos\tienda-web" },
+                new[] { new Cuenta("personal", @"C:\Users\ana\.claude-personal"), new Cuenta("trabajo", @"C:\Users\ana\.claude-trabajo"),
+                    new Cuenta("normal", @"C:\Users\ana\.claude") }, "personal");
+            Guardar((FrameworkElement)nueva.Content, Path.Combine(carpeta, "nueva.png"), nueva.Width,
+                (Brush)Application.Current.Resources["BrFondo"]);
         }
 
         private static void Guardar(FrameworkElement elemento, string ruta, double ancho, Brush? fondo = null)

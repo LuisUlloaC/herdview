@@ -142,6 +142,53 @@
         </Setter>
     </Style>
 
+    <!-- Opción como pastilla (las cuentas): marcada, con el borde y el texto en azul. -->
+    <Style x:Key="Pastilla" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource BrTenue}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Margin" Value="0,0,6,0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Marco" Background="{StaticResource BrSuperficie}" BorderBrush="{StaticResource BrBorde}"
+                            BorderThickness="1" CornerRadius="4" Padding="12,5">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Marco" Property="BorderBrush" Value="{StaticResource BrTrabajando}" />
+                            <Setter Property="Foreground" Value="{StaticResource BrTexto}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Marco" Property="Background" Value="{StaticResource BrSuperficieAlta}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- La acción principal de un diálogo. -->
+    <Style x:Key="BotonPrincipal" TargetType="Button">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Foreground" Value="#0E1116" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Fondo" Background="{StaticResource BrTrabajando}" CornerRadius="4" Padding="16,7">
+                        <ContentPresenter HorizontalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Fondo" Property="Background" Value="#8DBBFF" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="ToolTipOscuro" TargetType="ToolTip">
         <Setter Property="Background" Value="{StaticResource BrSuperficie}" />
         <Setter Property="Foreground" Value="{StaticResource BrTexto}" />

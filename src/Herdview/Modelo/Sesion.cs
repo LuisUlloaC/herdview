@@ -38,6 +38,7 @@ namespace Herdview.Modelo
         [DataMember(Name = "desde")] public double Desde { get; set; }
         /// <summary>Segundos Unix de la última actualización.</summary>
         [DataMember(Name = "ts")] public double Ts { get; set; }
+        [DataMember(Name = "cuenta")] public string Cuenta { get; set; } = "";
         [DataMember(Name = "transcript")] public string Transcript { get; set; } = "";
         [DataMember(Name = "procesos")] public List<ProcesoAncestro> Procesos { get; set; } = new List<ProcesoAncestro>();
 
@@ -86,6 +87,7 @@ namespace Herdview.Modelo
                     s.Actividad ??= "";
                     s.Aviso ??= "";
                     s.Transcript ??= "";
+                    s.Cuenta ??= "";
                     s.Procesos ??= new List<ProcesoAncestro>();
                     return s;
                 }

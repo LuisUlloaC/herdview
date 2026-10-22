@@ -22,6 +22,10 @@ namespace Herdview
             SourceInitialized += (_, __) => Win32.BarraOscura(new WindowInteropHelper(this).Handle);
         }
 
+        public event EventHandler? NuevaSesion;
+
+        private void AlNuevaSesion(object sender, RoutedEventArgs e) => NuevaSesion?.Invoke(this, EventArgs.Empty);
+
         /// <summary>Al salir de la app sí se cierra de verdad.</summary>
         public void CerrarDeVerdad()
         {

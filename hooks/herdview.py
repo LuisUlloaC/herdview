@@ -92,6 +92,15 @@ def ancestros(limite: int = 14) -> list:
     return cadena
 
 
+def cuenta(config_dir: str) -> str:
+    """La cuenta de Claude Code de la sesión, por su carpeta de configuración: «.claude-alt» → «alt»; sin
+    CLAUDE_CONFIG_DIR (o «.claude») → «normal»."""
+    nombre = os.path.basename(os.path.normpath(config_dir)) if config_dir else ".claude"
+    if nombre.startswith(".claude-"):
+        return nombre[len(".claude-"):]
+    return "normal" if nombre == ".claude" else nombre
+
+
 def origen(cadena: list) -> str:
     nombres = [p["exe"].lower() for p in cadena]
     if "code.exe" in nombres:
@@ -235,6 +244,8 @@ def registrar(evento: dict, ahora: float) -> None:
     if not nueva.get("procesos"):
         cadena = ancestros()
         nueva.update(procesos=cadena, origen=origen(cadena))
+    if not nueva.get("cuenta"):
+        nueva["cuenta"] = cuenta(os.environ.get("CLAUDE_CONFIG_DIR", ""))
     os.makedirs(CARPETA, exist_ok=True)
     temporal = "%s.%d.tmp" % (ruta, os.getpid())
     with open(temporal, "w", encoding="utf-8") as fh:

@@ -24,6 +24,8 @@
         <!-- Cabecera: nombre, recuento y los totales de todas las sesiones abiertas. -->
         <Border DockPanel.Dock="Top" Padding="24,18,24,16" BorderBrush="{StaticResource BrBorde}" BorderThickness="0,0,0,1">
             <DockPanel>
+                <Button DockPanel.Dock="Right" Style="{StaticResource BotonPrincipal}" Click="AlNuevaSesion"
+                        VerticalAlignment="Bottom" Margin="32,0,0,2" Content="+ Nueva sesión" />
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Bottom">
                     <StackPanel Margin="28,0,0,0" ToolTip="Entrada nueva: lo que no venía de la caché (incluye lo que se escribió en ella)">
                         <TextBlock Text="ENTRADA" Style="{StaticResource Rotulo}" HorizontalAlignment="Right" />

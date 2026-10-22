@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -38,6 +40,7 @@ namespace Herdview
         /// <summary>Lee las transcripciones (solo lo nuevo cada vez). Lo usa una sola tarea a la vez.</summary>
         private readonly MedidorConsumo _medidor = new MedidorConsumo();
         private bool _midiendo;
+        private Recientes _recientes = new Recientes();
 
         private void AlArrancar(object sender, StartupEventArgs e)
         {
@@ -55,6 +58,7 @@ namespace Herdview
             }
 
             _ajustes = Ajustes.Cargar();
+            _recientes = new Recientes(_ajustes.Recientes);
             _tira = new VentanaTira(_todas);
             _tira.AsaPulsada += (_, __) => AlternarPanel();
             _tira.Movida += (_, __) =>
@@ -72,7 +76,9 @@ namespace Herdview
             };
             _panel.Salir += (_, __) => Shutdown();
             _panel.AbrirVentana += (_, __) => AbrirVentana();
+            _panel.NuevaSesion += (_, __) => NuevaSesion();
             _ventana = new VentanaSesiones(_todas);
+            _ventana.NuevaSesion += (_, __) => NuevaSesion();
 
             CrearBandeja();
 
@@ -151,6 +157,15 @@ namespace Herdview
             _global = Panorama.Global(sesiones, Vista);
             Pintar();
             Medir();
+            bool nuevas = false;
+            foreach (var s in sesiones.Where(s => s.Cwd.Length > 0))
+            {
+                nuevas |= _recientes.Conocer(s.Cwd);
+            }
+            if (nuevas)
+            {
+                GuardarRecientes();
+            }
             foreach (var s in _avisador.QueAvisar(sesiones, ahora))
             {
                 Notificar(s);
@@ -209,6 +224,59 @@ namespace Herdview
                 Win32.Enfocar(ventana);
             }
             Recargar();
+        }
+
+        private void GuardarRecientes()
+        {
+            _ajustes.Recientes = _recientes.Carpetas.ToList();
+            _ajustes.Guardar();
+        }
+
+        /// <summary>Diálogo de sesión nueva y, si se acepta, pestaña de Windows Terminal con Claude arrancado.</summary>
+        private void NuevaSesion()
+        {
+            _panel?.Hide();
+            var cuentas = Lanzador.Cuentas(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+            var dialogo = new VentanaNueva(_recientes.Carpetas.ToList(), cuentas, _ajustes.UltimaCuenta);
+            if (_ventana != null && _ventana.IsVisible)
+            {
+                dialogo.Owner = _ventana;
+            }
+            if (dialogo.ShowDialog() != true || dialogo.CuentaElegida == null)
+            {
+                return;
+            }
+            Lanzar(dialogo.CarpetaElegida, dialogo.CuentaElegida, dialogo.PedidoInicial);
+            _recientes.Usar(dialogo.CarpetaElegida);
+            _ajustes.UltimaCuenta = dialogo.CuentaElegida.Nombre;
+            GuardarRecientes();
+        }
+
+        private static void Lanzar(string carpeta, Cuenta cuenta, string pedido)
+        {
+            string wt = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Microsoft", "WindowsApps", "wt.exe");
+            try
+            {
+                if (File.Exists(wt))
+                {
+                    Process.Start(new ProcessStartInfo(wt, Lanzador.ArgumentosTerminal(carpeta, cuenta, pedido))
+                    {
+                        UseShellExecute = false,
+                        WorkingDirectory = carpeta,
+                    });
+                    return;
+                }
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // Sin Windows Terminal utilizable: una consola normal.
+            }
+            Process.Start(new ProcessStartInfo("powershell.exe", Lanzador.ArgumentosPowerShell(cuenta, pedido))
+            {
+                UseShellExecute = true,
+                WorkingDirectory = carpeta,
+            });
         }
 
         private void AbrirVentana()
@@ -383,6 +451,7 @@ namespace Herdview
             var menu = new Forms.ContextMenuStrip();
             menu.Items.Add("Abrir panel", null, (_, __) => AlternarPanel());
             menu.Items.Add("Abrir ventana (con tokens)", null, (_, __) => AbrirVentana());
+            menu.Items.Add("Nueva sesión de Claude…", null, (_, __) => NuevaSesion());
             var tira = new Forms.ToolStripMenuItem("Tira visible", null, (_, __) => CambiarTira());
             var arranque = new Forms.ToolStripMenuItem("Arrancar con Windows", null, (_, __) =>
             {
