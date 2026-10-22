@@ -34,6 +34,7 @@ namespace Herdview
         public event EventHandler? CambiarTira;
         public event EventHandler? CambiarArranque;
         public event EventHandler? Salir;
+        public event EventHandler? AbrirVentana;
 
         public void Pintar(string resumen, bool hay, bool tiraVisible, bool arranca)
         {
@@ -82,5 +83,6 @@ namespace Herdview
         private void AlCambiarTira(object sender, RoutedEventArgs e) => CambiarTira?.Invoke(this, EventArgs.Empty);
         private void AlCambiarArranque(object sender, RoutedEventArgs e) => CambiarArranque?.Invoke(this, EventArgs.Empty);
         private void AlSalir(object sender, RoutedEventArgs e) => Salir?.Invoke(this, EventArgs.Empty);
+        private void AlAbrirVentana(object sender, RoutedEventArgs e) => AbrirVentana?.Invoke(this, EventArgs.Empty);
     }
 }

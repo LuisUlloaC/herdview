@@ -54,6 +54,28 @@ namespace Herdview.Modelo
             return s.Estado == EstadoSesion.Trabajando || s.Estado == EstadoSesion.Esperando ? Duracion(t) : Hace(t);
         }
 
+        /// <summary>Tokens en corto: «845», «12,3 k», «4,56 M», «5,63 G» (miles de millones).</summary>
+        public static string Tokens(long n)
+        {
+            var es = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+            if (n < 1000) return n.ToString(es);
+            if (n < 1_000_000) return (n / 1000.0).ToString(n < 100_000 ? "0.#" : "0", es) + " k";
+            if (n < 1_000_000_000) return (n / 1_000_000.0).ToString(n < 10_000_000 ? "0.##" : n < 100_000_000 ? "0.#" : "0", es) + " M";
+            return (n / 1_000_000_000.0).ToString(n < 10_000_000_000 ? "0.##" : "0.#", es) + " G";
+        }
+
+        /// <summary>«claude-opus-5-5» → «Opus 5.5».</summary>
+        public static string NombreModelo(string modelo)
+        {
+            if (string.IsNullOrEmpty(modelo)) return "";
+            string m = modelo.StartsWith("claude-", StringComparison.Ordinal) ? modelo.Substring(7) : modelo;
+            var partes = m.Split('-');
+            if (partes.Length < 2 || partes[0].Length == 0) return m;
+            string familia = char.ToUpperInvariant(partes[0][0]) + partes[0].Substring(1);
+            var version = partes.Skip(1).TakeWhile(p => p.Length <= 2 && p.All(char.IsDigit));
+            return (familia + " " + string.Join(".", version)).Trim();
+        }
+
         public static string NombreEstado(EstadoSesion e)
         {
             switch (e)

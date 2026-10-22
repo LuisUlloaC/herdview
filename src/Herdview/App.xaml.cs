@@ -34,6 +34,10 @@ namespace Herdview
         private readonly Avisador _avisador = new Avisador();
         /// <summary>La sesión del último aviso: al pulsarlo se abre el panel listo para escribirle.</summary>
         private string? _sesionDelAviso;
+        private VentanaSesiones? _ventana;
+        /// <summary>Lee las transcripciones (solo lo nuevo cada vez). Lo usa una sola tarea a la vez.</summary>
+        private readonly MedidorConsumo _medidor = new MedidorConsumo();
+        private bool _midiendo;
 
         private void AlArrancar(object sender, StartupEventArgs e)
         {
@@ -67,6 +71,8 @@ namespace Herdview
                 Pintar();
             };
             _panel.Salir += (_, __) => Shutdown();
+            _panel.AbrirVentana += (_, __) => AbrirVentana();
+            _ventana = new VentanaSesiones(_todas);
 
             CrearBandeja();
 
@@ -98,6 +104,7 @@ namespace Herdview
                 _bandeja.Visible = false;
                 _bandeja.Dispose();
             }
+            _ventana?.CerrarDeVerdad();
             _almacen?.Dispose();
             _unica?.Dispose();
         }
@@ -143,6 +150,7 @@ namespace Herdview
             }
             _global = Panorama.Global(sesiones, Vista);
             Pintar();
+            Medir();
             foreach (var s in _avisador.QueAvisar(sesiones, ahora))
             {
                 Notificar(s);
@@ -201,6 +209,57 @@ namespace Herdview
                 Win32.Enfocar(ventana);
             }
             Recargar();
+        }
+
+        private void AbrirVentana()
+        {
+            if (_ventana == null)
+            {
+                return;
+            }
+            _panel?.Hide();
+            _ventana.Abrir();
+            Medir();
+        }
+
+        /// <summary>Consumo de tokens en segundo plano (la primera lectura de una sesión larga tarda segundos). Solo con la
+        /// ventana abierta, que es donde se ve; al volver pone las cifras en cada sesión.</summary>
+        private void Medir()
+        {
+            if (_midiendo || _ventana == null || !_ventana.IsVisible)
+            {
+                return;
+            }
+            var pendientes = _todas.Where(v => v.Sesion.Transcript.Length > 0)
+                .Select(v => (v.Id, v.Sesion.Transcript)).ToList();
+            _midiendo = true;
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                var medidas = new Dictionary<string, Consumo>();
+                foreach (var (id, transcript) in pendientes)
+                {
+                    if (System.IO.File.Exists(transcript))
+                    {
+                        medidas[id] = _medidor.Medir(transcript);
+                    }
+                }
+                return medidas;
+            }).ContinueWith(t =>
+            {
+                _midiendo = false;
+                if (t.Status != System.Threading.Tasks.TaskStatus.RanToCompletion)
+                {
+                    return;
+                }
+                foreach (var vm in _todas)
+                {
+                    if (t.Result.TryGetValue(vm.Id, out var c))
+                    {
+                        vm.PonerConsumo(c);
+                    }
+                }
+                _ventana?.Pintar(Resumen(), _todas);
+            }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         /// <summary>Notificación de Windows (desde el icono de la bandeja). Si ya estás en la ventana de esa sesión, no.</summary>
@@ -268,6 +327,7 @@ namespace Herdview
             }
 
             string resumen = Resumen();
+            _ventana?.Pintar(resumen, _todas);
             _panel.Pintar(resumen, _todas.Count > 0, _ajustes.TiraVisible, Ajustes.ArrancaConWindows);
             if (!_globalPintado || _bandeja.Tag as EstadoSesion? != _global)
             {
@@ -322,6 +382,7 @@ namespace Herdview
         {
             var menu = new Forms.ContextMenuStrip();
             menu.Items.Add("Abrir panel", null, (_, __) => AlternarPanel());
+            menu.Items.Add("Abrir ventana (con tokens)", null, (_, __) => AbrirVentana());
             var tira = new Forms.ToolStripMenuItem("Tira visible", null, (_, __) => CambiarTira());
             var arranque = new Forms.ToolStripMenuItem("Arrancar con Windows", null, (_, __) =>
             {
@@ -346,6 +407,7 @@ namespace Herdview
                 Visible = true,
             };
             _bandeja.BalloonTipClicked += (_, __) => AlPulsarAviso();
+            _bandeja.MouseDoubleClick += (_, __) => AbrirVentana();
             _bandeja.MouseClick += (_, e) =>
             {
                 if (e.Button == Forms.MouseButtons.Left)

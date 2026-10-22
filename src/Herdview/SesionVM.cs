@@ -33,6 +33,26 @@ namespace Herdview
         public string Tiempo => _tiempo;
         public ICommand Enfocar { get; }
 
+        private Consumo? _consumo;
+
+        /// <summary>Tokens de la sesión (null hasta medirla o si no tiene transcripción: las «sin datos»).</summary>
+        public Consumo? Consumo => _consumo;
+        public string Modelo => _consumo == null ? "" : Panorama.NombreModelo(_consumo.Modelo);
+        public string Contexto => _consumo == null ? "—" : Panorama.Tokens(_consumo.Contexto);
+        public string Entrada => _consumo == null ? "—" : Panorama.Tokens(_consumo.EntradaNueva);
+        public string CacheLeida => _consumo == null ? "—" : Panorama.Tokens(_consumo.CacheLeida);
+        public string Salida => _consumo == null ? "—" : Panorama.Tokens(_consumo.Salida);
+
+        public void PonerConsumo(Consumo consumo)
+        {
+            _consumo = consumo;
+            Avisar(nameof(Modelo));
+            Avisar(nameof(Contexto));
+            Avisar(nameof(Entrada));
+            Avisar(nameof(CacheLeida));
+            Avisar(nameof(Salida));
+        }
+
         /// <summary>La línea de qué hace: lo que pide si te espera, la herramienta si trabaja.</summary>
         public string Linea
         {

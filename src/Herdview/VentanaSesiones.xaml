@@ -1,0 +1,132 @@
+<Window x:Class="Herdview.VentanaSesiones"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Herdview" Width="1120" Height="600" MinWidth="780" MinHeight="300"
+        Background="{StaticResource BrFondo}" Foreground="{StaticResource BrTexto}"
+        FontFamily="{StaticResource FuenteUi}" Icon="icono.ico" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <!-- Cifra de un medidor: monoespaciada y alineada a la derecha, como en un panel de instrumentos. -->
+        <Style x:Key="Cifra" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource FuenteMono}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="Rotulo" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{StaticResource BrApagada}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Grid.IsSharedSizeScope="True">
+        <!-- Cabecera: nombre, recuento y los totales de todas las sesiones abiertas. -->
+        <Border DockPanel.Dock="Top" Padding="24,18,24,16" BorderBrush="{StaticResource BrBorde}" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <StackPanel Margin="28,0,0,0" ToolTip="Entrada nueva: lo que no venía de la caché (incluye lo que se escribió en ella)">
+                        <TextBlock Text="ENTRADA" Style="{StaticResource Rotulo}" HorizontalAlignment="Right" />
+                        <TextBlock x:Name="TotalEntrada" Style="{StaticResource Cifra}" FontSize="20" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <StackPanel Margin="28,0,0,0" ToolTip="Leído de la caché: el contexto que se reenvía en cada turno (más barato)">
+                        <TextBlock Text="CACHÉ LEÍDA" Style="{StaticResource Rotulo}" HorizontalAlignment="Right" />
+                        <TextBlock x:Name="TotalCache" Style="{StaticResource Cifra}" FontSize="20" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <StackPanel Margin="28,0,0,0" ToolTip="Tokens generados por Claude (incluye el razonamiento)">
+                        <TextBlock Text="SALIDA" Style="{StaticResource Rotulo}" HorizontalAlignment="Right" />
+                        <TextBlock x:Name="TotalSalida" Style="{StaticResource Cifra}" FontSize="20" Margin="0,2,0,0" />
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Bottom">
+                    <TextBlock Text="HERDVIEW" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrTenue}" />
+                    <TextBlock x:Name="Resumen" FontSize="19" FontWeight="SemiBold" Margin="0,3,0,0" />
+                    <TextBlock x:Name="Nota" FontSize="11.5" Foreground="{StaticResource BrApagada}" Margin="0,3,0,0"
+                               Text="Tokens de cada sesión desde que se abrió, con sus subagentes. Clic en una fila: trae su ventana." />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Rótulos de las columnas. -->
+        <Grid DockPanel.Dock="Top" Margin="24,12,24,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="210" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Estado" />
+                <ColumnDefinition Width="96" />
+                <ColumnDefinition Width="96" />
+                <ColumnDefinition Width="96" />
+                <ColumnDefinition Width="96" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="SESIÓN" Style="{StaticResource Rotulo}" />
+            <TextBlock Grid.Column="2" Text="QUÉ HACE" Style="{StaticResource Rotulo}" Margin="12,0,0,0" />
+            <TextBlock Grid.Column="3" Text="ESTADO" Style="{StaticResource Rotulo}" HorizontalAlignment="Right" Margin="12,0,0,0" />
+            <TextBlock Grid.Column="4" Text="CONTEXTO" Style="{StaticResource Rotulo}" HorizontalAlignment="Right"
+                       ToolTip="Tamaño del contexto en la última respuesta" />
+            <TextBlock Grid.Column="5" Text="ENTRADA" Style="{StaticResource Rotulo}" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="6" Text="CACHÉ" Style="{StaticResource Rotulo}" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="7" Text="SALIDA" Style="{StaticResource Rotulo}" HorizontalAlignment="Right" />
+        </Grid>
+
+        <Grid>
+            <TextBlock x:Name="Vacio" Text="No hay sesiones de Claude abiertas." Foreground="{StaticResource BrTenue}"
+                       Margin="24,18" />
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="Lista" Margin="16,0,16,16">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource BotonPlano}" Command="{Binding Enfocar}" Margin="0,1"
+                                    HorizontalContentAlignment="Stretch">
+                                <Grid Margin="8,11,8,11">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30" />
+                                        <ColumnDefinition Width="210" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Estado" />
+                                        <ColumnDefinition Width="96" />
+                                        <ColumnDefinition Width="96" />
+                                        <ColumnDefinition Width="96" />
+                                        <ColumnDefinition Width="96" />
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse Style="{StaticResource Luz}" VerticalAlignment="Top" Margin="0,5,0,0" />
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding Proyecto}" FontSize="14" FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock FontSize="11.5" Foreground="{StaticResource BrApagada}" Margin="0,3,0,0"
+                                                   TextTrimming="CharacterEllipsis">
+                                            <Run Text="{Binding Origen, Mode=OneWay}" />
+                                            <Run Text="{Binding Modelo, Mode=OneWay}" Foreground="{StaticResource BrTenue}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Margin="12,0,0,0">
+                                        <TextBlock Text="{Binding Linea}" FontSize="12.5" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock x:Name="Pedido" Text="{Binding Pedido, StringFormat='» {0}'}" FontSize="11.5"
+                                                   Foreground="{StaticResource BrTenue}" Margin="0,3,0,0"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="3" Margin="12,0,0,0" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding NombreEstado}" Style="{StaticResource TextoEstado}" FontSize="12"
+                                                   HorizontalAlignment="Right" />
+                                        <TextBlock Text="{Binding Tiempo}" FontFamily="{StaticResource FuenteMono}" FontSize="11.5"
+                                                   Foreground="{StaticResource BrTenue}" HorizontalAlignment="Right" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="4" Text="{Binding Contexto}" Style="{StaticResource Cifra}" />
+                                    <TextBlock Grid.Column="5" Text="{Binding Entrada}" Style="{StaticResource Cifra}" />
+                                    <TextBlock Grid.Column="6" Text="{Binding CacheLeida}" Style="{StaticResource Cifra}"
+                                               Foreground="{StaticResource BrTenue}" />
+                                    <TextBlock Grid.Column="7" Text="{Binding Salida}" Style="{StaticResource Cifra}" />
+                                </Grid>
+                            </Button>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding TienePedido}" Value="False">
+                                    <Setter TargetName="Pedido" Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</Window>

@@ -44,6 +44,16 @@ namespace Herdview
             public int Y;
         }
 
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int atributo, ref int valor, int tam);
+
+        /// <summary>Barra de título oscura (Windows 10 20H1+ y 11), a juego con la ventana.</summary>
+        public static void BarraOscura(IntPtr hwnd)
+        {
+            int si = 1;
+            DwmSetWindowAttribute(hwnd, 20, ref si, sizeof(int));
+        }
+
         /// <summary>La ventana en primer plano ahora mismo.</summary>
         public static IntPtr Primera() => GetForegroundWindow();
 

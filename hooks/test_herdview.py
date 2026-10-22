@@ -57,6 +57,11 @@ class Aplicar(unittest.TestCase):
         s = herdview.aplicar({"estado": "trabajando", "desde": 3}, evento("SessionStart", source="compact"), 40)
         self.assertEqual((s["estado"], s["desde"]), ("trabajando", 3))
 
+    def test_guarda_la_transcripcion(self):
+        s = herdview.aplicar({}, evento("UserPromptSubmit", prompt="x", transcript_path=r"C:\t\s1.jsonl"), 10)
+        self.assertEqual(s["transcript"], r"C:\t\s1.jsonl")
+        self.assertEqual(herdview.aplicar(s, evento("Stop"), 11)["transcript"], r"C:\t\s1.jsonl")
+
 
 class Actividad(unittest.TestCase):
     def test_textos(self):

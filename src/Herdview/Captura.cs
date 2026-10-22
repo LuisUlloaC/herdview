@@ -41,6 +41,21 @@ namespace Herdview
             panel.Pintar("1 te espera · 1 trabajando · 1 terminó", true, true, false);
             Guardar((FrameworkElement)panel.Content, Path.Combine(carpeta, "panel.png"), panel.Width,
                 (Brush)Application.Current.Resources["BrFondo"]);
+
+            var consumos = new[]
+            {
+                new Consumo { Modelo = "claude-opus-5-5", Contexto = 182_400, Entrada = 2_310, CacheEscrita = 1_204_000, CacheLeida = 48_900_000, Salida = 312_000 },
+                new Consumo { Modelo = "claude-opus-5-5", Contexto = 509_260, Entrada = 490, CacheEscrita = 978_260, CacheLeida = 76_529_070, Salida = 231_770 },
+                new Consumo { Modelo = "claude-sonnet-5-5", Contexto = 64_100, Entrada = 880, CacheEscrita = 210_000, CacheLeida = 3_400_000, Salida = 41_200 },
+            };
+            for (int i = 0; i < consumos.Length; i++)
+            {
+                todas[i].PonerConsumo(consumos[i]);
+            }
+            var ventana = new VentanaSesiones(todas);
+            ventana.Pintar("1 te espera · 1 trabajando · 1 terminó", todas);
+            Guardar((FrameworkElement)ventana.Content, Path.Combine(carpeta, "ventana.png"), ventana.Width,
+                (Brush)Application.Current.Resources["BrFondo"]);
         }
 
         private static void Guardar(FrameworkElement elemento, string ruta, double ancho, Brush? fondo = null)

@@ -13,6 +13,12 @@ cuáles te esperan y cuáles terminaron. Funciona igual con la terminal que con 
 - **Panel** (clic en el icono de la bandeja): cada sesión con lo que está haciendo, lo último que le pediste y una
   caja para **escribirle sin cambiar de ventana**: si había terminado, se despierta con tu mensaje; si está
   trabajando, lo recibe al acabar.
+- **Ventana con el consumo** (doble clic en el icono de la bandeja, o «Ventana» en el panel): todas las sesiones
+  como filas de un tablero, con el modelo, el contexto actual y los tokens de entrada, caché leída y salida de cada
+  una (subagentes incluidos), y los totales arriba. Lo saca de la transcripción de cada sesión, leyendo solo lo nuevo.
+
+  ![Ventana](docs/img/ventana.png)
+
 - **Notificaciones** de Windows cuando una sesión termina o te espera (no si ya estás en su ventana). Al pulsarla se
   abre el panel con el cursor en la caja de esa sesión.
 - Las sesiones de Claude que aún no han pasado por el hook también salen, en gris, como «sin datos».

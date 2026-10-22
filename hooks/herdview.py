@@ -118,6 +118,9 @@ def aplicar(sesion: dict, evento: dict, ahora: float) -> dict:
     # La carpeta donde arrancó la sesión: la actual cambia cuando Claude trabaja en otros sitios.
     cwd = s.get("cwd") or evento.get("cwd") or ""
     s.update(id=evento.get("session_id", s.get("id", "")), cwd=cwd, proyecto=nombre_proyecto(cwd), ts=ahora)
+    # La transcripción: de ahí saca la app el consumo de tokens de la sesión.
+    if evento.get("transcript_path"):
+        s["transcript"] = evento["transcript_path"]
     s.setdefault("estado", "inicio")
     s.setdefault("desde", ahora)
 
