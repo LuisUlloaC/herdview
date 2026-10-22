@@ -71,3 +71,7 @@ Hace falta el SDK de .NET que fija `global.json`. `Cabina.exe --captura <carpeta
 de ejemplo a PNG sin abrir ventanas; `tools\generar-icono.ps1` regenera el icono.
 
 Al empujar un tag `vX.Y.Z`, el workflow `Release` compila y publica el `.exe` y el `.zip` en una release de GitHub.
+
+## Licencia
+
+MIT. Ver [LICENSE](LICENSE).
