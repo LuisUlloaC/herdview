@@ -109,6 +109,34 @@ namespace Herdview.Modelo
             return IntPtr.Zero;
         }
 
+        /// <summary>Para las sesiones sin ventana propia en Windows (las de un contenedor): la ventana de Windows Terminal o
+        /// de VS Code cuyo título lleve alguno de los textos (el contenedor, el proyecto); si no, la de Windows Terminal.</summary>
+        public static IntPtr VentanaPorTitulo(IConsultaProcesos consulta, IEnumerable<string> textos)
+        {
+            var buscados = textos.Where(t => t.Length > 1).ToList();
+            IntPtr terminal = IntPtr.Zero;
+            foreach (var p in consulta.Tabla().Values)
+            {
+                bool esTerminal = p.Exe.Equals("WindowsTerminal.exe", StringComparison.OrdinalIgnoreCase);
+                if (!esTerminal && !p.Exe.Equals("Code.exe", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                foreach (var v in consulta.Ventanas(p.Pid))
+                {
+                    if (buscados.Any(t => v.Titulo.IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0))
+                    {
+                        return v.Hwnd;
+                    }
+                    if (esTerminal && terminal == IntPtr.Zero)
+                    {
+                        terminal = v.Hwnd;
+                    }
+                }
+            }
+            return terminal;
+        }
+
         /// <summary>El nombre que se enseña de una carpeta: la última parte, «~» para la carpeta de usuario.</summary>
         public static string NombreProyecto(string cwd, string carpetaUsuario)
         {

@@ -9,6 +9,30 @@
         <TextBlock Text="NUEVA SESIÓN" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrTenue}" />
         <TextBlock Text="¿Dónde la abro?" FontSize="18" FontWeight="SemiBold" Margin="0,3,0,14" />
 
+        <WrapPanel Margin="0,0,0,16">
+            <RadioButton x:Name="EnWindows" Style="{StaticResource Pastilla}" GroupName="Donde" IsChecked="True"
+                         Checked="AlCambiarDonde">
+                <TextBlock Text="Windows" FontSize="12.5" />
+            </RadioButton>
+            <RadioButton x:Name="EnContenedor" Style="{StaticResource Pastilla}" GroupName="Donde" Checked="AlCambiarDonde">
+                <TextBlock Text="Contenedor de Docker" FontSize="12.5" />
+            </RadioButton>
+        </WrapPanel>
+
+        <!-- Docker: un contenedor en marcha y, si se quiere, la carpeta de dentro donde arrancar. -->
+        <StackPanel x:Name="PanelDocker" Visibility="Collapsed">
+            <TextBlock Text="CONTENEDOR" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource BrApagada}" Margin="0,0,0,6" />
+            <TextBlock x:Name="EstadoDocker" FontSize="12" Foreground="{StaticResource BrTenue}" Margin="0,0,0,6" />
+            <WrapPanel x:Name="Contenedores" />
+            <TextBlock Text="CARPETA DENTRO DEL CONTENEDOR (OPCIONAL)" FontSize="10.5" FontWeight="Bold"
+                       Foreground="{StaticResource BrApagada}" Margin="0,16,0,5" />
+            <TextBox x:Name="CarpetaDocker" Style="{StaticResource Caja}" AcceptsReturn="False" TextWrapping="NoWrap"
+                     PreviewKeyDown="AlTeclear" ToolTip="Vacío: la carpeta de trabajo del contenedor (WORKDIR)" />
+            <TextBlock Text="La primera vez Herdview copia su hook en el contenedor (necesita python3) para verla y escribirle."
+                       FontSize="11" Foreground="{StaticResource BrApagada}" Margin="0,6,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <StackPanel x:Name="PanelWindows">
         <TextBlock Text="CARPETA" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource BrApagada}" Margin="0,0,0,5" />
         <DockPanel>
             <Button DockPanel.Dock="Right" Style="{StaticResource BotonPlano}" Click="AlElegir" Margin="8,0,0,0">
@@ -38,6 +62,7 @@
 
         <TextBlock Text="CUENTA" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource BrApagada}" Margin="0,16,0,6" />
         <WrapPanel x:Name="Cuentas" />
+        </StackPanel>
 
         <TextBlock Text="PRIMER PEDIDO (OPCIONAL)" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource BrApagada}"
                    Margin="0,16,0,5" />

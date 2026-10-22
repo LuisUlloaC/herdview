@@ -62,6 +62,10 @@ namespace Herdview
                     new Cuenta("normal", @"C:\Users\ana\.claude") }, "personal");
             Guardar((FrameworkElement)nueva.Content, Path.Combine(carpeta, "nueva.png"), nueva.Width,
                 (Brush)Application.Current.Resources["BrFondo"]);
+
+            nueva.MostrarDocker(new[] { new Contenedor("1", "api-dev", "node:22"), new Contenedor("2", "datos", "python:3.13") });
+            Guardar((FrameworkElement)nueva.Content, Path.Combine(carpeta, "nueva-docker.png"), nueva.Width,
+                (Brush)Application.Current.Resources["BrFondo"]);
         }
 
         private static void Guardar(FrameworkElement elemento, string ruta, double ancho, Brush? fondo = null)

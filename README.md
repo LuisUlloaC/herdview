@@ -25,6 +25,14 @@ cuáles te esperan y cuáles terminaron. Funciona igual con la terminal que con 
 
   ![Nueva sesión](docs/img/nueva.png)
 
+- **Contenedores de Docker**: las sesiones de Claude que corren dentro de un contenedor también salen (como
+  «Docker · <contenedor>»), con estado, tokens y buzón. En «Nueva sesión» → «Contenedor de Docker» eliges uno en marcha
+  y Herdview copia su hook dentro (`~/.herdview/herdview.py`, necesita `python3`), lo registra en el Claude Code del
+  contenedor y abre una pestaña con `docker exec -it … claude`. Todo va por `docker exec`: sin montar carpetas ni abrir
+  puertos. Dentro del contenedor el hook cuenta los tokens él mismo, porque la transcripción no se ve desde Windows.
+
+  ![Nueva sesión en Docker](docs/img/nueva-docker.png)
+
 - **Notificaciones** de Windows cuando una sesión termina o te espera (no si ya estás en su ventana). Al pulsarla se
   abre el panel con el cursor en la caja de esa sesión.
 - Las sesiones de Claude que aún no han pasado por el hook también salen, en gris, como «sin datos».

@@ -16,5 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="icono.ico" />
+    <!-- El hook va dentro del exe: Herdview lo copia en los contenedores al prepararlos. -->
+    <EmbeddedResource Include="..\..\hooks\herdview.py" LogicalName="herdview.py" />
   </ItemGroup>
 </Project>

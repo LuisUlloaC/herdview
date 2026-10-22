@@ -28,9 +28,14 @@ namespace Herdview
     public partial class VentanaNueva : Window
     {
         private readonly List<RadioButton> _cuentas = new List<RadioButton>();
+        private readonly List<RadioButton> _contenedores = new List<RadioButton>();
+        private readonly Func<IReadOnlyList<Contenedor>>? _contenedoresEnMarcha;
+        private bool _contenedoresPedidos;
 
-        public VentanaNueva(IReadOnlyList<string> recientes, IReadOnlyList<Cuenta> cuentas, string? ultimaCuenta)
+        public VentanaNueva(IReadOnlyList<string> recientes, IReadOnlyList<Cuenta> cuentas, string? ultimaCuenta,
+            Func<IReadOnlyList<Contenedor>>? contenedoresEnMarcha = null)
         {
+            _contenedoresEnMarcha = contenedoresEnMarcha;
             InitializeComponent();
             SourceInitialized += (_, __) => Win32.BarraOscura(new WindowInteropHelper(this).Handle);
             Recientes.ItemsSource = recientes;
@@ -64,6 +69,70 @@ namespace Herdview
         public string CarpetaElegida => Carpeta.Text.Trim().Trim('"');
         public Cuenta? CuentaElegida => _cuentas.Find(r => r.IsChecked == true)?.Tag as Cuenta;
         public string PedidoInicial => Pedido.Text;
+        /// <summary>El contenedor elegido (null si la sesión va en Windows).</summary>
+        public Contenedor? ContenedorElegido =>
+            EnContenedor.IsChecked == true ? _contenedores.Find(r => r.IsChecked == true)?.Tag as Contenedor : null;
+        public string CarpetaContenedor => CarpetaDocker.Text.Trim();
+
+        private void AlCambiarDonde(object sender, RoutedEventArgs e)
+        {
+            if (PanelDocker == null || PanelWindows == null)
+            {
+                return; // aún construyéndose
+            }
+            bool docker = EnContenedor.IsChecked == true;
+            PanelDocker.Visibility = docker ? Visibility.Visible : Visibility.Collapsed;
+            PanelWindows.Visibility = docker ? Visibility.Collapsed : Visibility.Visible;
+            Error.Visibility = Visibility.Collapsed;
+            if (docker && !_contenedoresPedidos)
+            {
+                _contenedoresPedidos = true;
+                CargarContenedores();
+            }
+        }
+
+        /// <summary>docker ps en segundo plano (con Docker parado tarda un poco en fallar).</summary>
+        private void CargarContenedores()
+        {
+            EstadoDocker.Text = "Buscando contenedores…";
+            var consulta = _contenedoresEnMarcha;
+            System.Threading.Tasks.Task.Run(() => consulta?.Invoke() ?? Array.Empty<Contenedor>()).ContinueWith(t =>
+            {
+                PonerContenedores(t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion ? t.Result : Array.Empty<Contenedor>());
+            }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        /// <summary>Pasa a Docker con estos contenedores (la captura de pantalla lo usa sin preguntar a Docker).</summary>
+        public void MostrarDocker(IReadOnlyList<Contenedor> lista)
+        {
+            _contenedoresPedidos = true;
+            EnContenedor.IsChecked = true;
+            PonerContenedores(lista);
+        }
+
+        private void PonerContenedores(IReadOnlyList<Contenedor> lista)
+        {
+                EstadoDocker.Text = lista.Count == 0 ? "No hay contenedores en marcha (¿está arrancado Docker Desktop?)." : "";
+                EstadoDocker.Visibility = lista.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+                foreach (var c in lista)
+                {
+                    var opcion = new RadioButton
+                    {
+                        Style = (Style)FindResource("Pastilla"),
+                        GroupName = "Contenedor",
+                        Content = new TextBlock { Text = c.Nombre, FontSize = 12.5 },
+                        ToolTip = c.Imagen,
+                        Tag = c,
+                        Margin = new Thickness(0, 0, 6, 6),
+                    };
+                    _contenedores.Add(opcion);
+                    Contenedores.Children.Add(opcion);
+                }
+                if (_contenedores.Count > 0)
+                {
+                    _contenedores[0].IsChecked = true;
+                }
+        }
 
         private void AlElegir(object sender, RoutedEventArgs e)
         {
@@ -103,6 +172,17 @@ namespace Herdview
 
         private void AlAbrir(object sender, RoutedEventArgs e)
         {
+            if (EnContenedor.IsChecked == true)
+            {
+                if (ContenedorElegido == null)
+                {
+                    EstadoDocker.Text = "Elige un contenedor en marcha.";
+                    EstadoDocker.Visibility = Visibility.Visible;
+                    return;
+                }
+                DialogResult = true;
+                return;
+            }
             if (!Directory.Exists(CarpetaElegida))
             {
                 Error.Text = "Esa carpeta no existe.";

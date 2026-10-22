@@ -41,6 +41,11 @@ namespace Herdview
         private readonly MedidorConsumo _medidor = new MedidorConsumo();
         private bool _midiendo;
         private Recientes _recientes = new Recientes();
+        private readonly IDocker _docker = new DockerCli();
+        /// <summary>Las sesiones de los contenedores, de la última consulta a Docker (en segundo plano).</summary>
+        private List<Sesion> _sesionesDocker = new List<Sesion>();
+        private bool _consultandoDocker;
+        private DateTime _ultimaDocker = DateTime.MinValue;
 
         private void AlArrancar(object sender, StartupEventArgs e)
         {
@@ -140,6 +145,8 @@ namespace Herdview
             DateTime ahora = DateTime.UtcNow;
             _ultimaCarga = ahora;
             var anotadas = _almacen.Cargar(ahora);
+            anotadas.AddRange(_sesionesDocker);
+            ConsultarDocker(ahora);
             anotadas.AddRange(Procesos.SinDatos(anotadas, _procesos,
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)));
             var sesiones = Panorama.Ordenar(anotadas, Vista);
@@ -195,6 +202,10 @@ namespace Herdview
                     }
                 }
                 vm.Actualizar(s, Vista(s), ahora);
+                if (s.ConsumoHook != null)
+                {
+                    vm.PonerConsumo(s.ConsumoHook.AConsumo());
+                }
             }
             while (coleccion.Count > sesiones.Count)
             {
@@ -218,12 +229,49 @@ namespace Herdview
         {
             _vistas[vm.Id] = vm.Sesion.Desde;
             IntPtr ventana = Procesos.VentanaDe(vm.Sesion, _procesos);
+            if (ventana == IntPtr.Zero && vm.Sesion.Contenedor.Length > 0)
+            {
+                ventana = Procesos.VentanaPorTitulo(_procesos, new[] { vm.Sesion.Contenedor, vm.Proyecto });
+            }
             if (ventana != IntPtr.Zero)
             {
                 _panel?.Hide();
                 Win32.Enfocar(ventana);
             }
             Recargar();
+        }
+
+        /// <summary>Cada 5 s, en segundo plano, las sesiones de los contenedores (docker exec tarda; con Docker parado no
+        /// hay ninguna). Si cambia algo, se vuelve a pintar.</summary>
+        private void ConsultarDocker(DateTime ahora)
+        {
+            if (_consultandoDocker || ahora - _ultimaDocker < CadaCuantoComprobar)
+            {
+                return;
+            }
+            _consultandoDocker = true;
+            _ultimaDocker = ahora;
+            System.Threading.Tasks.Task.Run(() => EnDocker.Sesiones(_docker)).ContinueWith(t =>
+            {
+                _consultandoDocker = false;
+                var nuevas = t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion ? t.Result : new List<Sesion>();
+                bool cambio = nuevas.Count != _sesionesDocker.Count
+                    || nuevas.Zip(_sesionesDocker, (a, b) => a.Id != b.Id || a.Ts != b.Ts).Any(x => x);
+                _sesionesDocker = nuevas;
+                if (cambio)
+                {
+                    Recargar();
+                }
+            }, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        private static string HookIncrustado()
+        {
+            using (var flujo = typeof(App).Assembly.GetManifestResourceStream("herdview.py")!)
+            using (var lector = new StreamReader(flujo, System.Text.Encoding.UTF8))
+            {
+                return lector.ReadToEnd().Replace("\r\n", "\n");
+            }
         }
 
         private void GuardarRecientes()
@@ -237,12 +285,30 @@ namespace Herdview
         {
             _panel?.Hide();
             var cuentas = Lanzador.Cuentas(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-            var dialogo = new VentanaNueva(_recientes.Carpetas.ToList(), cuentas, _ajustes.UltimaCuenta);
+            var dialogo = new VentanaNueva(_recientes.Carpetas.ToList(), cuentas, _ajustes.UltimaCuenta, () => _docker.EnMarcha());
             if (_ventana != null && _ventana.IsVisible)
             {
                 dialogo.Owner = _ventana;
             }
-            if (dialogo.ShowDialog() != true || dialogo.CuentaElegida == null)
+            if (dialogo.ShowDialog() != true)
+            {
+                return;
+            }
+            if (dialogo.ContenedorElegido != null)
+            {
+                var c = dialogo.ContenedorElegido;
+                var (resultado, detalle) = EnDocker.Preparar(_docker, c.Id, HookIncrustado());
+                if (resultado != EnDocker.Preparacion.Lista)
+                {
+                    MessageBox.Show(detalle, "Herdview · " + c.Nombre, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                AbrirTerminal(EnDocker.ArgumentosTerminal(c.Nombre, dialogo.CarpetaContenedor, dialogo.PedidoInicial), null,
+                    "-NoLogo -NoExit -EncodedCommand " + Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(
+                        EnDocker.Script(c.Nombre, dialogo.CarpetaContenedor, dialogo.PedidoInicial))));
+                return;
+            }
+            if (dialogo.CuentaElegida == null)
             {
                 return;
             }
@@ -252,7 +318,11 @@ namespace Herdview
             GuardarRecientes();
         }
 
-        private static void Lanzar(string carpeta, Cuenta cuenta, string pedido)
+        private static void Lanzar(string carpeta, Cuenta cuenta, string pedido) =>
+            AbrirTerminal(Lanzador.ArgumentosTerminal(carpeta, cuenta, pedido), carpeta, Lanzador.ArgumentosPowerShell(cuenta, pedido));
+
+        /// <summary>Pestaña nueva de Windows Terminal; sin él, una consola de PowerShell con los mismos argumentos.</summary>
+        private static void AbrirTerminal(string argumentosWt, string? carpeta, string argumentosPowerShell)
         {
             string wt = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Microsoft", "WindowsApps", "wt.exe");
@@ -260,10 +330,10 @@ namespace Herdview
             {
                 if (File.Exists(wt))
                 {
-                    Process.Start(new ProcessStartInfo(wt, Lanzador.ArgumentosTerminal(carpeta, cuenta, pedido))
+                    Process.Start(new ProcessStartInfo(wt, argumentosWt)
                     {
                         UseShellExecute = false,
-                        WorkingDirectory = carpeta,
+                        WorkingDirectory = carpeta ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     });
                     return;
                 }
@@ -272,10 +342,10 @@ namespace Herdview
             {
                 // Sin Windows Terminal utilizable: una consola normal.
             }
-            Process.Start(new ProcessStartInfo("powershell.exe", Lanzador.ArgumentosPowerShell(cuenta, pedido))
+            Process.Start(new ProcessStartInfo("powershell.exe", argumentosPowerShell)
             {
                 UseShellExecute = true,
-                WorkingDirectory = carpeta,
+                WorkingDirectory = carpeta ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             });
         }
 
@@ -365,6 +435,10 @@ namespace Herdview
 
         private bool Enviar(SesionVM vm, string texto)
         {
+            if (vm.Sesion.Contenedor.Length > 0)
+            {
+                return EnDocker.Enviar(_docker, vm.Sesion, texto);
+            }
             try
             {
                 Buzon.Enviar(Buzon.CarpetaPorDefecto, vm.Id, texto);

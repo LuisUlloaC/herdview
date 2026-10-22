@@ -22,6 +22,24 @@ namespace Herdview.Modelo
         [DataMember(Name = "exe")] public string Exe { get; set; } = "";
     }
 
+    [DataContract]
+    public sealed class ConsumoHook
+    {
+        [DataMember(Name = "entrada")] public long Entrada { get; set; }
+        [DataMember(Name = "cache_escrita")] public long CacheEscrita { get; set; }
+        [DataMember(Name = "cache_leida")] public long CacheLeida { get; set; }
+        [DataMember(Name = "salida")] public long Salida { get; set; }
+        [DataMember(Name = "contexto")] public long Contexto { get; set; }
+        [DataMember(Name = "modelo")] public string? Modelo { get; set; }
+        [DataMember(Name = "respuestas")] public int Respuestas { get; set; }
+
+        public Consumo AConsumo() => new Consumo
+        {
+            Entrada = Entrada, CacheEscrita = CacheEscrita, CacheLeida = CacheLeida, Salida = Salida,
+            Contexto = Contexto, Modelo = Modelo ?? "", Respuestas = Respuestas,
+        };
+    }
+
     /// <summary>Lo que el hook (hooks/herdview.py) escribe de cada sesión de Claude en su JSON.</summary>
     [DataContract]
     public sealed class Sesion
@@ -38,6 +56,11 @@ namespace Herdview.Modelo
         [DataMember(Name = "desde")] public double Desde { get; set; }
         /// <summary>Segundos Unix de la última actualización.</summary>
         [DataMember(Name = "ts")] public double Ts { get; set; }
+        [DataMember(Name = "contenedor")] public string Contenedor { get; set; } = "";
+        /// <summary>Id de Docker del contenedor (lo pone Herdview al leerla; no viene del hook).</summary>
+        public string ContenedorId { get; set; } = "";
+        /// <summary>Tokens contados por el hook (en los contenedores, donde la app no ve la transcripción).</summary>
+        [DataMember(Name = "consumo")] public ConsumoHook? ConsumoHook { get; set; }
         [DataMember(Name = "cuenta")] public string Cuenta { get; set; } = "";
         [DataMember(Name = "transcript")] public string Transcript { get; set; } = "";
         [DataMember(Name = "procesos")] public List<ProcesoAncestro> Procesos { get; set; } = new List<ProcesoAncestro>();
@@ -88,6 +111,8 @@ namespace Herdview.Modelo
                     s.Aviso ??= "";
                     s.Transcript ??= "";
                     s.Cuenta ??= "";
+                    s.Contenedor ??= "";
+                    s.ContenedorId ??= "";
                     s.Procesos ??= new List<ProcesoAncestro>();
                     return s;
                 }

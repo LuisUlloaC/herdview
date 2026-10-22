@@ -78,6 +78,72 @@ class Actividad(unittest.TestCase):
         self.assertEqual(herdview.cuenta(r"C:\Users\ana\.claude"), "normal")
 
 
+def respuesta(id_, entrada, escrita, leida, salida, modelo="claude-opus-5-5", lateral=False):
+    """Una línea de transcripción como las de Claude Code (igual que en ConsumoTests.cs)."""
+    return json.dumps({"type": "assistant", "isSidechain": lateral, "message": {
+        "model": modelo, "id": id_, "role": "assistant", "content": [{"type": "text", "text": "hola"}],
+        "usage": {"input_tokens": entrada, "cache_creation_input_tokens": escrita, "cache_read_input_tokens": leida,
+                  "output_tokens": salida, "cache_creation": {"ephemeral_5m_input_tokens": 999},
+                  "iterations": [{"input_tokens": 777}]}}}, separators=(",", ":")) + "\n"
+
+
+class Contenedor(unittest.TestCase):
+    """Lo que el hook hace dentro de un contenedor (Linux): tokens, listar, enviar e instalar."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.antes = (herdview.CARPETA, herdview.BUZON, herdview.CONSUMO)
+        herdview.CARPETA = os.path.join(self.tmp.name, "sesiones")
+        herdview.BUZON = os.path.join(self.tmp.name, "buzon")
+        herdview.CONSUMO = os.path.join(self.tmp.name, "consumo")
+
+    def tearDown(self):
+        herdview.CARPETA, herdview.BUZON, herdview.CONSUMO = self.antes
+        self.tmp.cleanup()
+
+    def test_tokens_como_la_app_y_solo_lo_nuevo(self):
+        t = os.path.join(self.tmp.name, "s1.jsonl")
+        with open(t, "w", encoding="utf-8") as fh:
+            fh.write(respuesta("msg_1", 10, 100, 1000, 5) * 2 + respuesta("msg_2", 2, 50, 1100, 7)[:40])
+        c = herdview.medir("s1", t)
+        self.assertEqual((c["entrada"], c["salida"], c["respuestas"], c["contexto"]), (10, 5, 1, 1110))
+        with open(t, "a", encoding="utf-8") as fh:
+            fh.write(respuesta("msg_2", 2, 50, 1100, 7)[40:])
+        os.makedirs(os.path.join(self.tmp.name, "s1", "subagents"))
+        with open(os.path.join(self.tmp.name, "s1", "subagents", "agent-a.jsonl"), "w", encoding="utf-8") as fh:
+            fh.write(respuesta("msg_9", 3, 30, 300, 9, "claude-haiku-5-5", lateral=True))
+        c = herdview.medir("s1", t)
+        self.assertEqual((c["entrada"], c["cache_escrita"], c["cache_leida"], c["salida"], c["respuestas"]),
+                         (15, 180, 2400, 21, 3))
+        self.assertEqual((c["contexto"], c["modelo"]), (1152, "claude-opus-5-5"))
+
+    def test_listar_borra_las_de_claudes_muertos_pasada_la_gracia(self):
+        herdview.escribir_json(herdview.ruta_de("viva"), {"id": "viva", "ts": 100})
+        herdview.escribir_json(herdview.ruta_de("muerta"), {"id": "muerta", "ts": 100, "pid_claude": 999999})
+        herdview.escribir_json(herdview.ruta_de("reciente"), {"id": "reciente", "ts": 195, "pid_claude": 999999})
+        self.assertEqual([s["id"] for s in herdview.listar(200)], ["reciente", "viva"])
+        self.assertFalse(os.path.exists(herdview.ruta_de("muerta")))
+
+    def test_enviar_suma_al_buzon(self):
+        herdview.enviar("s1", " hola ")
+        herdview.enviar("s1", "sigue")
+        with open(herdview.buzon_de("s1", ".txt"), encoding="utf-8") as fh:
+            self.assertEqual(fh.read(), "hola\n\nsigue")
+
+    def test_instalar_registra_una_vez_sin_tocar_lo_demas(self):
+        config = os.path.join(self.tmp.name, "claude")
+        herdview.escribir_json(os.path.join(config, "settings.json"),
+                               {"model": "opus", "hooks": {"Stop": [{"hooks": [{"type": "command", "command": "otro"}]}]}})
+        herdview.instalar(config, "/root/.herdview/herdview.py")
+        herdview.instalar(config, "/root/.herdview/herdview.py")
+        with open(os.path.join(config, "settings.json"), encoding="utf-8") as fh:
+            a = json.load(fh)
+        self.assertEqual(a["model"], "opus")
+        stop = [h["command"] for g in a["hooks"]["Stop"] for h in g["hooks"]]
+        self.assertEqual(stop, ["otro", 'python3 "/root/.herdview/herdview.py"', 'python3 "/root/.herdview/herdview.py" esperar'])
+        self.assertEqual(len(a["hooks"]["PreToolUse"]), 1)
+
+
 class Buzon(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -132,15 +198,21 @@ class Buzon(unittest.TestCase):
 class Proceso(unittest.TestCase):
     def test_escribe_y_borra_el_fichero(self):
         with tempfile.TemporaryDirectory() as tmp:
-            entorno = dict(os.environ, LOCALAPPDATA=tmp)
-            correr = lambda e: subprocess.run([sys.executable, "-I", herdview.__file__], input=json.dumps(e).encode(),
-                                              env=entorno, capture_output=True, check=True)
+            entorno = dict(os.environ, HERDVIEW_DIR=tmp)
+            correr = lambda e, *orden: subprocess.run([sys.executable, "-I", herdview.__file__, *orden],
+                                                      input=json.dumps(e).encode(), env=entorno, capture_output=True,
+                                                      check=True)
             correr(evento("UserPromptSubmit", prompt="hola"))
-            ruta = os.path.join(tmp, "Herdview", "sesiones", "s1.json")
+            ruta = os.path.join(tmp, "sesiones", "s1.json")
             with open(ruta, encoding="utf-8") as fh:
                 datos = json.load(fh)
             self.assertEqual(datos["estado"], "trabajando")
-            self.assertTrue(any(p["exe"].lower() == "python.exe" for p in datos["procesos"]))
+            # El padre del hook es este intérprete de Python (python.exe en Windows, python3 en Linux).
+            self.assertTrue(any(p["exe"].lower().startswith("python") for p in datos["procesos"]))
+            if os.name != "nt":
+                self.assertIn(datos["origen"], ("Docker", "Linux"))
+                listado = correr({}, "listar").stdout.decode("utf-8").splitlines()
+                self.assertEqual([json.loads(l)["id"] for l in listado], ["s1"])
             correr(evento("SessionEnd"))
             self.assertFalse(os.path.exists(ruta))
 
