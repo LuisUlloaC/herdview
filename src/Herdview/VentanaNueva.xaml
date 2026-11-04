@@ -62,8 +62,26 @@
 
         <TextBlock Text="CUENTA" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource BrApagada}" Margin="0,16,0,6" />
         <WrapPanel x:Name="Cuentas" />
+
+        <!-- Cuenta nueva: nombre y de cuál copiar los ajustes. El inicio de sesión lo hace uno mismo en la sesión. -->
+        <StackPanel x:Name="PanelCuentaNueva" Visibility="Collapsed" Margin="0,12,0,0">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left" Text=".claude-" FontSize="12.5" Foreground="{StaticResource BrApagada}"
+                           VerticalAlignment="Center" Margin="0,0,6,0" />
+                <TextBox x:Name="NombreCuenta" Style="{StaticResource Caja}" AcceptsReturn="False" TextWrapping="NoWrap"
+                         PreviewKeyDown="AlTeclear" ToolTip="Minúsculas, números y guiones" />
+            </DockPanel>
+            <TextBlock x:Name="ErrorCuenta" Foreground="#E0605A" FontSize="11.5" Margin="0,4,0,0" Visibility="Collapsed" />
+            <TextBlock Text="COPIAR AJUSTES DE" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource BrApagada}"
+                       Margin="0,12,0,6" />
+            <WrapPanel x:Name="CopiarDe" />
+            <TextBlock Text="Copia settings.json, CLAUDE.md, agents, skills y plugins; nunca el inicio de sesión. Arranca sin primer pedido: Claude te pedirá entrar con tu cuenta."
+                       FontSize="11" Foreground="{StaticResource BrApagada}" Margin="0,6,0,0" TextWrapping="Wrap" />
+        </StackPanel>
         </StackPanel>
 
+        <!-- Oculto con una cuenta nueva: antes del pedido vienen la bienvenida de Claude y el inicio de sesión. -->
+        <StackPanel x:Name="BloquePedido">
         <TextBlock Text="PRIMER PEDIDO (OPCIONAL)" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource BrApagada}"
                    Margin="0,16,0,5" />
         <Grid>
@@ -71,9 +89,10 @@
             <TextBlock x:Name="PistaPedido" Text="Lo primero que le pides (Ctrl+Enter abre)" Foreground="{StaticResource BrApagada}"
                        FontSize="12" Margin="9,5,0,0" IsHitTestVisible="False" />
         </Grid>
+        </StackPanel>
 
         <DockPanel Margin="0,20,0,0">
-            <Button DockPanel.Dock="Right" Style="{StaticResource BotonPrincipal}" Click="AlAbrir"
+            <Button x:Name="BotonAbrir" DockPanel.Dock="Right" Style="{StaticResource BotonPrincipal}" Click="AlAbrir"
                     Content="Abrir en Windows Terminal" />
             <Button DockPanel.Dock="Right" Style="{StaticResource BotonPlano}" Click="AlCancelar" Margin="0,0,8,0">
                 <TextBlock Text="Cancelar" Foreground="{StaticResource BrTenue}" FontSize="12.5" Margin="12,7" />

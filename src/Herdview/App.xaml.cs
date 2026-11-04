@@ -287,8 +287,9 @@ namespace Herdview
         private void NuevaSesion()
         {
             _panel?.Hide();
-            var cuentas = Lanzador.Cuentas(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-            var dialogo = new VentanaNueva(_recientes.Carpetas.ToList(), cuentas, _ajustes.UltimaCuenta, () => _docker.EnMarcha());
+            string usuario = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var cuentas = Lanzador.Cuentas(usuario);
+            var dialogo = new VentanaNueva(_recientes.Carpetas.ToList(), cuentas, _ajustes.UltimaCuenta, () => _docker.EnMarcha(), usuario);
             if (_ventana != null && _ventana.IsVisible)
             {
                 dialogo.Owner = _ventana;
@@ -311,14 +312,84 @@ namespace Herdview
                         EnDocker.Script(c.Nombre, dialogo.CarpetaContenedor, dialogo.PedidoInicial))));
                 return;
             }
-            if (dialogo.CuentaElegida == null)
+            Cuenta? cuenta = dialogo.CuentaElegida;
+            if (dialogo.CuentaNueva != null)
+            {
+                try
+                {
+                    cuenta = AltaCuenta.Crear(usuario, dialogo.CuentaNueva, dialogo.CopiarAjustesDe);
+                }
+                catch (Exception error) when (error is IOException || error is UnauthorizedAccessException || error is InvalidOperationException)
+                {
+                    MessageBox.Show("No pude crear la cuenta «" + dialogo.CuentaNueva + "»: " + error.Message, "Herdview",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                string? aviso = InstalarHook(cuenta, cuentas);
+                if (aviso != null)
+                {
+                    MessageBox.Show(aviso, "Herdview · " + cuenta.Nombre, MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            if (cuenta == null)
             {
                 return;
             }
-            Lanzar(dialogo.CarpetaElegida, dialogo.CuentaElegida, dialogo.PedidoInicial);
+            Lanzar(dialogo.CarpetaElegida, cuenta, dialogo.PedidoInicial);
             _recientes.Usar(dialogo.CarpetaElegida);
-            _ajustes.UltimaCuenta = dialogo.CuentaElegida.Nombre;
+            _ajustes.UltimaCuenta = cuenta.Nombre;
             GuardarRecientes();
+        }
+
+        /// <summary>Registra los hooks de Herdview en la cuenta (si no los trae copiados) con «herdview.py instalar»: el mismo
+        /// herdview.py que usan las demás cuentas o, si ninguna lo tiene, el que va dentro del exe. null = todo bien.</summary>
+        private static string? InstalarHook(Cuenta cuenta, IEnumerable<Cuenta> otras)
+        {
+            if (AltaCuenta.TieneHook(cuenta.Carpeta))
+            {
+                return null;
+            }
+            const string fallo = "La cuenta está creada, pero no pude instalarle los hooks de Herdview ({0}). " +
+                "La sesión se abre igual; Herdview no la verá hasta que los instales (README).";
+            try
+            {
+                string script = AltaCuenta.HookConocido(otras) ?? GuardarHookIncrustado();
+                var inicio = new ProcessStartInfo("python", "-I \"" + script + "\" instalar")
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                };
+                inicio.EnvironmentVariables["CLAUDE_CONFIG_DIR"] = cuenta.Carpeta;
+                using (var proceso = Process.Start(inicio)!)
+                {
+                    string error = proceso.StandardError.ReadToEnd();
+                    if (!proceso.WaitForExit(15000))
+                    {
+                        return string.Format(fallo, "python no respondió");
+                    }
+                    if (proceso.ExitCode != 0 || !AltaCuenta.TieneHook(cuenta.Carpeta))
+                    {
+                        return string.Format(fallo, error.Trim().Length > 0 ? error.Trim() : "código " + proceso.ExitCode);
+                    }
+                }
+                return null;
+            }
+            catch (Exception error) when (error is System.ComponentModel.Win32Exception || error is IOException ||
+                                          error is UnauthorizedAccessException)
+            {
+                return string.Format(fallo, "¿está Python en el PATH? " + error.Message);
+            }
+        }
+
+        /// <summary>Deja el hook que va dentro del exe en %LOCALAPPDATA%\Herdview\herdview.py y devuelve su ruta.</summary>
+        private static string GuardarHookIncrustado()
+        {
+            string ruta = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Herdview", "herdview.py");
+            Directory.CreateDirectory(Path.GetDirectoryName(ruta)!);
+            File.WriteAllText(ruta, HookIncrustado(), new System.Text.UTF8Encoding(false));
+            return ruta;
         }
 
         private static void Lanzar(string carpeta, Cuenta cuenta, string pedido) =>

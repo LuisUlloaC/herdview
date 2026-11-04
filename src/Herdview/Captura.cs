@@ -57,10 +57,16 @@ namespace Herdview
             Guardar((FrameworkElement)ventana.Content, Path.Combine(carpeta, "ventana.png"), ventana.Width,
                 (Brush)Application.Current.Resources["BrFondo"]);
 
-            var nueva = new VentanaNueva(new[] { @"C:\proyectos\api-pagos", @"C:\proyectos\juego-3d", @"C:\proyectos\tienda-web" },
-                new[] { new Cuenta("personal", @"C:\Users\ana\.claude-personal"), new Cuenta("trabajo", @"C:\Users\ana\.claude-trabajo"),
-                    new Cuenta("normal", @"C:\Users\ana\.claude") }, "personal");
+            var recientes = new[] { @"C:\proyectos\api-pagos", @"C:\proyectos\juego-3d", @"C:\proyectos\tienda-web" };
+            var cuentas = new[] { new Cuenta("personal", @"C:\Users\ana\.claude-personal"), new Cuenta("trabajo", @"C:\Users\ana\.claude-trabajo"),
+                new Cuenta("pruebas", @"C:\Users\ana\.claude-pruebas", sinSesion: true), new Cuenta("normal", @"C:\Users\ana\.claude") };
+            var nueva = new VentanaNueva(recientes, cuentas, "personal");
             Guardar((FrameworkElement)nueva.Content, Path.Combine(carpeta, "nueva.png"), nueva.Width,
+                (Brush)Application.Current.Resources["BrFondo"]);
+
+            var alta = new VentanaNueva(recientes, cuentas, "personal");
+            alta.MostrarCuentaNueva("juegos");
+            Guardar((FrameworkElement)alta.Content, Path.Combine(carpeta, "nueva-cuenta.png"), alta.Width,
                 (Brush)Application.Current.Resources["BrFondo"]);
 
             nueva.MostrarDocker(new[] { new Contenedor("1", "api-dev", "node:22"), new Contenedor("2", "datos", "python:3.13") });

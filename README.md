@@ -25,6 +25,13 @@ cuáles te esperan y cuáles terminaron. Funciona igual con la terminal que con 
 
   ![Nueva sesión](docs/img/nueva.png)
 
+- **Crear cuentas** desde el mismo diálogo («+ nueva» en Cuenta): Herdview crea `.claude-<nombre>`, si quieres con
+  los ajustes de otra cuenta (`settings.json`, `CLAUDE.md`, agents, skills y plugins; nunca credenciales, identidad ni
+  historial), le instala sus hooks y abre la sesión. El inicio de sesión lo haces tú en la propia sesión: Herdview no
+  toca credenciales. Las cuentas que aún no han entrado salen como «sin sesión».
+
+  ![Cuenta nueva](docs/img/nueva-cuenta.png)
+
 - **Contenedores de Docker**: las sesiones de Claude que corren dentro de un contenedor también salen (como
   «Docker · <contenedor>»), con estado, tokens y buzón. En «Nueva sesión» → «Contenedor de Docker» eliges uno en marcha
   y Herdview copia su hook dentro (`~/.herdview/herdview.py`, necesita `python3`), lo registra en el Claude Code del

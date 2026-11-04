@@ -9,15 +9,22 @@ namespace Herdview.Modelo
     /// <summary>Una cuenta de Claude Code: su carpeta de configuración («.claude» es la normal, sin CLAUDE_CONFIG_DIR).</summary>
     public sealed class Cuenta
     {
-        public Cuenta(string nombre, string carpeta)
+        public Cuenta(string nombre, string carpeta, bool sinSesion = false)
         {
             Nombre = nombre;
             Carpeta = carpeta;
+            SinSesion = sinSesion;
         }
 
         public string Nombre { get; }
         public string Carpeta { get; }
         public bool EsNormal => Nombre == "normal";
+        /// <summary>Aún no se ha iniciado sesión (no hay .credentials.json): al abrirla, Claude pedirá entrar.</summary>
+        public bool SinSesion { get; }
+
+        /// <summary>La cuenta de esa carpeta, mirando si ya tiene la sesión iniciada.</summary>
+        public static Cuenta De(string nombre, string carpeta) =>
+            new Cuenta(nombre, carpeta, !File.Exists(Path.Combine(carpeta, ".credentials.json")));
     }
 
     /// <summary>Abre sesiones nuevas de Claude Code en una pestaña de Windows Terminal (o en una consola si no hay).</summary>
@@ -35,13 +42,13 @@ namespace Herdview.Modelo
             {
                 if (File.Exists(Path.Combine(d, "settings.json")) || Directory.Exists(Path.Combine(d, "projects")))
                 {
-                    cuentas.Add(new Cuenta(Path.GetFileName(d).Substring(".claude-".Length), d));
+                    cuentas.Add(Cuenta.De(Path.GetFileName(d).Substring(".claude-".Length), d));
                 }
             }
             string normal = Path.Combine(carpetaUsuario, ".claude");
             if (Directory.Exists(normal))
             {
-                cuentas.Add(new Cuenta("normal", normal));
+                cuentas.Add(Cuenta.De("normal", normal));
             }
             return cuentas;
         }

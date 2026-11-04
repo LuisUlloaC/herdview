@@ -454,7 +454,9 @@ def main() -> int:
         return 0
     if orden == "instalar":
         config = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(os.path.expanduser("~"), ".claude")
-        print(instalar(config, os.path.abspath(__file__), "python3" if not WINDOWS else "python -I"))
+        script = os.path.abspath(__file__)
+        # En Windows, con barras «/»: Claude Code puede lanzar los hooks con Git Bash, y así queda igual que a mano.
+        print(instalar(config, script.replace("\\", "/") if WINDOWS else script, "python -I" if WINDOWS else "python3"))
         return 0
     evento = json.loads(sys.stdin.buffer.read().decode("utf-8") or "{}")
     if not evento.get("session_id"):

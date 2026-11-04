@@ -24,10 +24,12 @@ namespace Herdview.Tests
                 Directory.CreateDirectory(Path.Combine(_usuario, d));
             }
             File.WriteAllText(Path.Combine(_usuario, ".claude-alt", "settings.json"), "{}");
+            File.WriteAllText(Path.Combine(_usuario, ".claude-alt", ".credentials.json"), "{}");
             Directory.CreateDirectory(Path.Combine(_usuario, ".claude-trabajo", "projects"));
             var cuentas = Lanzador.Cuentas(_usuario);
             Assert.Equal(new[] { "alt", "trabajo", "normal" }, cuentas.Select(c => c.Nombre));
             Assert.True(cuentas[2].EsNormal);
+            Assert.Equal(new[] { false, true, true }, cuentas.Select(c => c.SinSesion));
         }
 
         [Fact]
