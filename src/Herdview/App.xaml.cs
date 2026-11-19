@@ -330,6 +330,10 @@ namespace Herdview
                 {
                     MessageBox.Show(aviso, "Herdview · " + cuenta.Nombre, MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
+                if (dialogo.CrearComandoConsola)
+                {
+                    CrearComando(cuenta.Nombre);
+                }
             }
             if (cuenta == null)
             {
@@ -380,6 +384,24 @@ namespace Herdview
                                           error is UnauthorizedAccessException)
             {
                 return string.Format(fallo, "¿está Python en el PATH? " + error.Message);
+            }
+        }
+
+        /// <summary>Añade «claude-&lt;nombre&gt;» a los perfiles de PowerShell; si no puede, lo avisa (la cuenta ya está creada).</summary>
+        private static void CrearComando(string nombre)
+        {
+            string documentos = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            foreach (string perfil in PerfilPowerShell.Rutas(documentos))
+            {
+                try
+                {
+                    PerfilPowerShell.Anadir(perfil, nombre);
+                }
+                catch (Exception error) when (error is IOException || error is UnauthorizedAccessException)
+                {
+                    MessageBox.Show("La cuenta está creada, pero no pude añadir el comando " + PerfilPowerShell.Comando(nombre) +
+                        " a " + perfil + ": " + error.Message, "Herdview · " + nombre, MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
         }
 

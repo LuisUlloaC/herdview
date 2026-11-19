@@ -168,6 +168,38 @@
         </Setter>
     </Style>
 
+    <!-- Casilla de sí/no: cuadro con borde que se rellena de azul con la marca. -->
+    <Style x:Key="Casilla" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{StaticResource BrTenue}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <Border x:Name="Cuadro" Width="14" Height="14" CornerRadius="3" BorderThickness="1"
+                                BorderBrush="{StaticResource BrBorde}" Background="{StaticResource BrSuperficie}"
+                                VerticalAlignment="Center">
+                            <Path x:Name="Marca" Data="M 2.5,7 L 5.5,10 L 11,3.5" Stroke="#0E1116" StrokeThickness="1.8"
+                                  Visibility="Collapsed" />
+                        </Border>
+                        <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Cuadro" Property="Background" Value="{StaticResource BrTrabajando}" />
+                            <Setter TargetName="Cuadro" Property="BorderBrush" Value="{StaticResource BrTrabajando}" />
+                            <Setter TargetName="Marca" Property="Visibility" Value="Visible" />
+                            <Setter Property="Foreground" Value="{StaticResource BrTexto}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Cuadro" Property="BorderBrush" Value="{StaticResource BrTrabajando}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- La acción principal de un diálogo. -->
     <Style x:Key="BotonPrincipal" TargetType="Button">
         <Setter Property="Cursor" Value="Hand" />

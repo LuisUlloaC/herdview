@@ -28,7 +28,11 @@ cuáles te esperan y cuáles terminaron. Funciona igual con la terminal que con 
 - **Crear cuentas** desde el mismo diálogo («+ nueva» en Cuenta): Herdview crea `.claude-<nombre>`, si quieres con
   los ajustes de otra cuenta (`settings.json`, `CLAUDE.md`, agents, skills y plugins; nunca credenciales, identidad ni
   historial), le instala sus hooks y abre la sesión. El inicio de sesión lo haces tú en la propia sesión: Herdview no
-  toca credenciales. Las cuentas que aún no han entrado salen como «sin sesión».
+  toca credenciales. Las cuentas que aún no han entrado salen como «sin sesión». Con la casilla marcada (lo normal)
+  añade también el comando `claude-<nombre>` al final de tu perfil de PowerShell (el de Windows PowerShell y, si
+  tienes su carpeta, el de PowerShell 7), para abrir esa cuenta desde cualquier consola nueva; si el comando ya
+  existe no lo repite. Un perfil recién creado solo se carga si la directiva de ejecución lo permite
+  (`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`).
 
   ![Cuenta nueva](docs/img/nueva-cuenta.png)
 

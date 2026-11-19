@@ -73,7 +73,12 @@ namespace Herdview
             _nueva.Unchecked += (_, __) => PonerCuentaNueva(false);
             _nueva.IsChecked = _cuentas.Count == 0;
             Cuentas.Children.Add(_nueva);
-            NombreCuenta.TextChanged += (_, __) => ErrorCuenta.Visibility = Visibility.Collapsed;
+            NombreCuenta.TextChanged += (_, __) =>
+            {
+                ErrorCuenta.Visibility = Visibility.Collapsed;
+                string nombre = NombreCuenta.Text.Trim().ToLowerInvariant();
+                TextoComando.Text = "Crear el comando " + PerfilPowerShell.Comando(nombre.Length > 0 ? nombre : "…") + " en PowerShell";
+            };
             Pedido.TextChanged += (_, __) =>
                 PistaPedido.Visibility = Pedido.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
             Loaded += (_, __) =>
@@ -137,6 +142,8 @@ namespace Herdview
         /// <summary>El nombre de la cuenta a crear (null si se eligió una que ya existe).</summary>
         public string? CuentaNueva =>
             EnContenedor.IsChecked != true && _nueva?.IsChecked == true ? NombreCuenta.Text.Trim().ToLowerInvariant() : null;
+        /// <summary>Si la cuenta nueva lleva su comando «claude-&lt;nombre&gt;» en el perfil de PowerShell.</summary>
+        public bool CrearComandoConsola => CuentaNueva != null && CrearComando.IsChecked == true;
         /// <summary>De qué cuenta copiar los ajustes de la nueva (null = empezar de cero).</summary>
         public Cuenta? CopiarAjustesDe => _origenes.Find(r => r.IsChecked == true)?.Tag as Cuenta;
         /// <summary>Una cuenta nueva arranca sin pedido: antes viene la bienvenida de Claude y el inicio de sesión.</summary>
