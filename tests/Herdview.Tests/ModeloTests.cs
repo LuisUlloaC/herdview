@@ -94,6 +94,18 @@ namespace Herdview.Tests
         }
 
         [Fact]
+        public void Sesion_con_cadena_sin_claude_esta_muerta_y_sin_cadena_viva()
+        {
+            // Hook de inicio que llegó tarde: Claude ya había salido y la cadena se corta en el bash del hook.
+            var huerfana = Sesion.Leer("{\"id\":\"s2\",\"ts\":1761120010,\"procesos\":[{\"pid\":10,\"exe\":\"bash.exe\"}]}")!;
+            var p = new ProcesosFalsos();
+            p.Vivo(10, 1, "bash.exe");
+            Assert.False(Procesos.Viva(huerfana, p.Tabla()));
+            var sinCadena = Sesion.Leer("{\"id\":\"s3\",\"ts\":1761120010}")!;
+            Assert.True(Procesos.Viva(sinCadena, p.Tabla()));
+        }
+
+        [Fact]
         public void El_pid_de_claude_solo_si_sigue_siendo_claude()
         {
             var s = Sesion.Leer(Json)!;

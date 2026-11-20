@@ -124,6 +124,17 @@ class Contenedor(unittest.TestCase):
         self.assertEqual([s["id"] for s in herdview.listar(200)], ["reciente", "viva"])
         self.assertFalse(os.path.exists(herdview.ruta_de("muerta")))
 
+    @unittest.skipUnless(os.name == "nt", "solo Windows impide reemplazar un fichero abierto")
+    def test_reintenta_si_herdview_tiene_el_fichero_abierto(self):
+        ruta = herdview.ruta_de("s1")
+        herdview.escribir_json(ruta, {"v": 1})
+        abierto = open(ruta, encoding="utf-8")
+        threading.Timer(0.3, abierto.close).start()
+        herdview.escribir_json(ruta, {"v": 2})
+        with open(ruta, encoding="utf-8") as fh:
+            self.assertEqual(json.load(fh), {"v": 2})
+        self.assertEqual([n for n in os.listdir(herdview.CARPETA) if n.endswith(".tmp")], [])
+
     def test_enviar_suma_al_buzon(self):
         herdview.enviar("s1", "﻿ hola ")
         herdview.enviar("s1", "sigue")

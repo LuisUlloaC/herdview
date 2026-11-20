@@ -305,7 +305,18 @@ def escribir_json(ruta: str, datos) -> None:
     temporal = "%s.%d.tmp" % (ruta, os.getpid())
     with open(temporal, "w", encoding="utf-8") as fh:
         json.dump(datos, fh, ensure_ascii=False)
-    os.replace(temporal, ruta)
+    # En Windows os.replace falla mientras Herdview lee el fichero (lo abre sin permiso de borrado): reintentar un rato
+    # y, si no hay manera, no dejar el temporal tirado.
+    for _ in range(40):
+        try:
+            os.replace(temporal, ruta)
+            return
+        except PermissionError:
+            time.sleep(0.05)
+    try:
+        os.remove(temporal)
+    except OSError:
+        pass
 
 
 USO = [re.compile(r'"%s"\s*:\s*(\d+)' % c) for c in

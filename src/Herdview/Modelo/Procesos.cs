@@ -85,11 +85,17 @@ namespace Herdview.Modelo
         }
 
         /// <summary>La sesión está viva si su proceso de Claude existe y sigue siendo el mismo programa (los PID se
-        /// reutilizan). Sin cadena no se puede saber: se da por viva.</summary>
+        /// reutilizan). Una cadena sin Claude es de un hook que corrió con Claude ya cerrado (los hooks van en segundo
+        /// plano: el de inicio de una sesión abierta y cerrada enseguida llega después del de fin y la vuelve a crear):
+        /// muerta. Sin cadena no se puede saber: se da por viva.</summary>
         public static bool Viva(Sesion s, IReadOnlyDictionary<int, ProcesoVivo> tabla)
         {
+            if (s.Procesos.Count == 0)
+            {
+                return true;
+            }
             int i = IndiceClaude(s.Procesos);
-            return i < 0 || Mismo(tabla, s.Procesos[i]);
+            return i >= 0 && Mismo(tabla, s.Procesos[i]);
         }
 
         /// <summary>La primera ventana subiendo desde Claude: la de Windows Terminal, la consola o la de VS Code. Si el
